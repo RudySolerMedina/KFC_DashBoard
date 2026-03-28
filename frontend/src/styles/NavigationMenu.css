@@ -65,7 +65,7 @@
 /* Mobile responsiveness */
 @media (max-width: 1024px) {
   .navigation-menu {
-    right: 10px;
+    left: 10px;
   }
 
   .nav-button {
@@ -84,7 +84,7 @@
     position: static;
     transform: none;
     flex-direction: row;
-    border-left: none;
+    border-right: none;
     border-bottom: 2px solid rgba(68, 246, 255, 0.3);
     border-radius: 0;
     justify-content: center;

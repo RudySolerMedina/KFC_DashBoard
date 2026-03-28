@@ -20,6 +20,10 @@ __pycache__/
 venv/
 *.egg-info/
 test_payload.py
+backend/.env
+frontend/node_modules/
+frontend/dist/
+.vite/
 
 # Editor directories and files
 .vscode/*
