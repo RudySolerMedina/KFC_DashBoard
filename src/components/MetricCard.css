@@ -51,14 +51,45 @@
   color: rgba(159, 178, 209, 0.7);
 }
 
-/* ── Sparkline ─────────────────────────────────────────── */
+/* ────────────────────── Sparkline with Scale ────────────────────── */
+.sparkline-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 3px;
+  border-top: 1px solid rgba(68, 246, 255, 0.12);
+}
+
+.sparkline-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 52px;
+  font-size: 0.7rem;
+  color: rgba(159, 178, 209, 0.5);
+  text-align: right;
+  min-width: 35px;
+  line-height: 1;
+}
+
+.scale-max {
+  font-weight: 600;
+  color: rgba(159, 178, 209, 0.75);
+}
+
+.scale-mid {
+  opacity: 0.6;
+}
+
+.scale-min {
+  opacity: 0.5;
+}
+
 .sparkline {
   display: block;
-  width: 100%;
+  flex: 1;
   height: 52px;
-  margin-top: 0.75rem;
-  border-top: 1px solid rgba(68, 246, 255, 0.12);
-  padding-top: 3px;
   overflow: visible;
 }
 
@@ -74,6 +105,25 @@
 @keyframes dot-blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.35; }
+}
+
+.sparkline-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 52px;
+  font-size: 0.75rem;
+  color: rgba(68, 246, 255, 0.8);
+  font-weight: 500;
+}
+
+.sparkline-current {
+  background: rgba(68, 246, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(68, 246, 255, 0.3);
 }
 
 .sparkline-empty {

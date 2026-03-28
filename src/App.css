@@ -101,12 +101,58 @@ body {
 }
 
 .metric-group.electric-card {
+  --electric-border-color: #46b7ff;
+  --electric-light-color: #9edcff;
+  --electric-gradient-color: rgba(70, 183, 255, 0.34);
+  --electric-title-color: #d5edff;
   overflow: visible;
   background:
     linear-gradient(-30deg, var(--electric-gradient-color), transparent, var(--electric-gradient-color)),
     linear-gradient(to bottom, rgba(18, 24, 40, 0.94), rgba(18, 24, 40, 0.94));
   border: none;
   isolation: isolate;
+}
+
+.metric-group.electric-card.group-total {
+  --electric-border-color: #ffd84a;
+  --electric-light-color: #ffef9b;
+  --electric-gradient-color: rgba(255, 216, 74, 0.34);
+  --electric-title-color: #ffe27a;
+}
+
+.metric-group.electric-card.group-voltages {
+  --electric-border-color: #53a4ff;
+  --electric-light-color: #add4ff;
+  --electric-gradient-color: rgba(83, 164, 255, 0.32);
+  --electric-title-color: #cfe4ff;
+}
+
+.metric-group.electric-card.group-microclimate {
+  --electric-border-color: #f2f6ff;
+  --electric-light-color: #ffffff;
+  --electric-gradient-color: rgba(255, 255, 255, 0.2);
+  --electric-title-color: #ffffff;
+}
+
+.metric-group.electric-card.group-currents {
+  --electric-border-color: #2dd7b0;
+  --electric-light-color: #8cf3d9;
+  --electric-gradient-color: rgba(45, 215, 176, 0.3);
+  --electric-title-color: #b9f8e7;
+}
+
+.metric-group.electric-card.group-power {
+  --electric-border-color: #ff9a42;
+  --electric-light-color: #ffd2a6;
+  --electric-gradient-color: rgba(255, 154, 66, 0.32);
+  --electric-title-color: #ffd8b1;
+}
+
+.metric-group.electric-card.group-power-factor {
+  --electric-border-color: #8f93ff;
+  --electric-light-color: #c5c8ff;
+  --electric-gradient-color: rgba(143, 147, 255, 0.3);
+  --electric-title-color: #d8d9ff;
 }
 
 .electric-filter-defs {
@@ -125,7 +171,7 @@ body {
 .metric-group .border-outer {
   position: absolute;
   inset: 0;
-  border: 2px solid rgba(221, 132, 72, 0.5);
+  border: 2px solid color-mix(in srgb, var(--electric-border-color) 60%, transparent 40%);
   border-radius: 1.2rem;
   padding-right: 4px;
   padding-bottom: 4px;
@@ -150,7 +196,7 @@ body {
 }
 
 .metric-group .glow-layer-1 {
-  border: 2px solid rgba(221, 132, 72, 0.6);
+  border: 2px solid color-mix(in srgb, var(--electric-border-color) 70%, transparent 30%);
   filter: blur(1px);
 }
 
@@ -177,7 +223,12 @@ body {
   filter: blur(24px);
   transform: scale(1.05);
   opacity: 0.35;
-  background: linear-gradient(-30deg, rgba(242, 174, 121, 0.5), transparent, rgba(221, 132, 72, 0.5));
+  background: linear-gradient(
+    -30deg,
+    color-mix(in srgb, var(--electric-light-color) 55%, transparent 45%),
+    transparent,
+    color-mix(in srgb, var(--electric-border-color) 65%, transparent 35%)
+  );
 }
 
 .metric-group > h2,
@@ -203,8 +254,8 @@ body {
 }
 
 .metric-group.electric-card .group-title {
-  color: #ffdca1;
-  text-shadow: 0 0 12px rgba(221, 132, 72, 0.6);
+  color: var(--electric-title-color);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--electric-border-color) 70%, white 30%);
 }
 
 @media (max-width: 768px) {
