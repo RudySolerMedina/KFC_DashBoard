@@ -1,0 +1,39 @@
+.connection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  background: rgba(10, 17, 29, 0.66);
+  border: 1px solid rgba(68, 246, 255, 0.35);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.pulse-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.pulse-dot.live {
+  background: var(--neon-green);
+  box-shadow: 0 0 12px var(--neon-green);
+}
+
+.pulse-dot.offline {
+  background: var(--neon-red);
+  box-shadow: 0 0 12px var(--neon-red);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.connection-text {
+  color: var(--text-main);
+  font-weight: 500;
+}
