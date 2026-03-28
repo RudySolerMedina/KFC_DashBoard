@@ -3,9 +3,12 @@ import { MetricCard } from './components/MetricCard'
 import { ConnectionStatus } from './components/ConnectionStatus'
 import './App.css'
 
+const MAX_HISTORY = 60
+
 function App() {
   const [metrics, setMetrics] = useState([])
   const [values, setValues] = useState({})
+  const [histories, setHistories] = useState({})
   const [connected, setConnected] = useState(false)
   const [broker, setBroker] = useState('')
   const wsRef = useRef(null)
@@ -31,31 +34,35 @@ function App() {
     ws.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data)
-        
+
         if (payload.type === 'bootstrap') {
           setBroker(payload.broker)
           setMetrics(payload.metrics)
           setValues(payload.values)
+          // Seed histories with the initial bootstrap values
+          const init = {}
+          Object.entries(payload.values).forEach(([topic, v]) => {
+            const num = typeof v === 'object' ? v.value : v
+            if (typeof num === 'number' && !isNaN(num)) init[topic] = [num]
+          })
+          setHistories(init)
         }
-        
+
         if (payload.type === 'metric') {
-          setValues(prev => ({
-            ...prev,
-            [payload.topic]: { value: payload.value, ts: payload.ts }
-          }))
+          const num = parseFloat(payload.value)
+          setValues(prev => ({ ...prev, [payload.topic]: { value: num, ts: payload.ts } }))
+          setHistories(prev => {
+            const arr = prev[payload.topic] || []
+            return { ...prev, [payload.topic]: [...arr, num].slice(-MAX_HISTORY) }
+          })
         }
       } catch (error) {
         console.error('WebSocket parse error:', error)
       }
     }
 
-    ws.onerror = () => {
-      setConnected(false)
-    }
-
-    ws.onclose = () => {
-      setConnected(false)
-    }
+    ws.onerror = () => { setConnected(false) }
+    ws.onclose = () => { setConnected(false) }
 
     wsRef.current = ws
 
@@ -64,7 +71,8 @@ function App() {
     }
   }, [])
 
-  const groupOrder = ['voltages', 'currents', 'power', 'power_factor', 'total']
+  // total first — hero position at the top
+  const groupOrder = ['total', 'voltages', 'currents', 'power', 'power_factor']
   const groupLabels = {
     voltages: 'Напряжение по фазам · KFC',
     currents: 'Ток по фазам · KFC',
@@ -81,6 +89,37 @@ function App() {
 
   return (
     <div className="app">
+      <svg className="electric-filter-defs" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="turbulent-displace" colorInterpolationFilters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise1" seed="1" />
+            <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1">
+              <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
+            </feOffset>
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
+            <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2">
+              <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear" />
+            </feOffset>
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
+            <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3">
+              <animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
+            </feOffset>
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
+            <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4">
+              <animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear" />
+            </feOffset>
+
+            <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
+            <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
+            <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
+            <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B" />
+          </filter>
+        </defs>
+      </svg>
+
       <header className="header">
         <div className="header-content">
           <div>
@@ -94,7 +133,21 @@ function App() {
       <main className="container">
         <div className="groups-grid">
           {groups.map(group => (
-            <section key={group.id} className="metric-group electric-border">
+            <section
+              key={group.id}
+              className="metric-group electric-card"
+            >
+              <div className="electric-frame" aria-hidden="true">
+                <div className="border-outer">
+                  <div className="main-card-layer"></div>
+                </div>
+                <div className="glow-layer-1"></div>
+                <div className="glow-layer-2"></div>
+                <div className="overlay-1"></div>
+                <div className="overlay-2"></div>
+                <div className="background-glow"></div>
+              </div>
+
               <h2 className="group-title">{group.label}</h2>
               <div className="metrics-row">
                 {group.metrics.map(metric => (
@@ -102,6 +155,7 @@ function App() {
                     key={metric.id}
                     metric={metric}
                     value={values[metric.topic]?.value}
+                    history={histories[metric.topic]}
                   />
                 ))}
               </div>

@@ -50,3 +50,38 @@
   font-size: 0.75rem;
   color: rgba(159, 178, 209, 0.7);
 }
+
+/* ── Sparkline ─────────────────────────────────────────── */
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 52px;
+  margin-top: 0.75rem;
+  border-top: 1px solid rgba(68, 246, 255, 0.12);
+  padding-top: 3px;
+  overflow: visible;
+}
+
+.sparkline-line {
+  filter: drop-shadow(0 0 3px rgba(68, 246, 255, 0.9));
+}
+
+.sparkline-dot {
+  filter: drop-shadow(0 0 5px #44f6ff);
+  animation: dot-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.sparkline-empty {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(159, 178, 209, 0.25);
+  letter-spacing: 0.4em;
+  border-top: 1px solid rgba(68, 246, 255, 0.08);
+  padding-top: 6px;
+}
