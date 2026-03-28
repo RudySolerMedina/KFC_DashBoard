@@ -74,11 +74,11 @@ function App() {
   // total first — hero position at the top
   const groupOrder = ['total', 'voltages', 'currents', 'power', 'power_factor']
   const groupLabels = {
-    voltages: 'Напряжение по фазам · KFC',
-    currents: 'Ток по фазам · KFC',
-    power: 'Мощность по фазам · KFC',
-    power_factor: 'Коэффициент мощности · KFC',
-    total: 'Общая нагрузка · KFC'
+    voltages: 'Общее напряжение по фазам · Ресторан KFC',
+    currents: 'Общий ток по фазам · Ресторан KFC',
+    power: 'Общая мощность по фазам · Ресторан KFC',
+    power_factor: 'Общий коэффициент мощности · Ресторан KFC',
+    total: 'Общая нагрузка · Ресторан KFC'
   }
 
   const groups = groupOrder.map(groupId => ({
@@ -135,7 +135,7 @@ function App() {
           {groups.map(group => (
             <section
               key={group.id}
-              className="metric-group electric-card"
+              className={`metric-group electric-card group-${group.id.replace('_', '-')}`}
             >
               <div className="electric-frame" aria-hidden="true">
                 <div className="border-outer">
