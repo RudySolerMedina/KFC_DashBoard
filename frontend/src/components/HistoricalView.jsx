@@ -13,6 +13,7 @@ const AREA_OPTIONS = [
   {
     id: 'total_kfc',
     label: 'Общая нагрузка, KFC',
+    photo: '/areas/total_kfc.png',
     topics: [
       'Nevinnomisk/devices/energomera303_00000201/controls/Urms L1',
       'Nevinnomisk/devices/energomera303_00000201/controls/Urms L2',
@@ -30,8 +31,8 @@ const AREA_OPTIONS = [
       'Nevinnomisk/devices/energomera303_00000201/controls/Total A energy'
     ]
   },
-  { id: 'f100_left', label: 'F100 Левая (Закрытые жаровни:1.1)', topics: [] },
-  { id: 'f100_right', label: 'F100 Правая (Закрытые жаровни:1.2)', topics: [] },
+  { id: 'f100_left', label: 'F100 Левая (Закрытые жаровни:1.1)', photo: '/areas/f100_left.png', topics: [] },
+  { id: 'f100_right', label: 'F100 Правая (Закрытые жаровни:1.2)', photo: '/areas/f100_right.png', topics: [] },
   { id: 'fastron_1_left', label: 'FASTRON_1 Левая (Открытые жаровни:2.1)', topics: [] },
   { id: 'fastron_2_mid', label: 'FASTRON_2 Средная (Открытые жаровни:2.2)', topics: [] },
   { id: 'fastron_3_right', label: 'FASTRON_3 Правая (Открытые жаровни:2.3)', topics: [] },
@@ -98,6 +99,8 @@ const PHASE_COLORS = ['#44f6ff', '#fbbf24', '#4ade80']
 
 const AREA_GROUPING = {
   total_kfc: {
+    accentColor: '#44f6ff',
+    phaseColors: PHASE_COLORS,
     pinned: [
       'Nevinnomisk/devices/energomera303_00000201/controls/Total P',
       'Nevinnomisk/devices/energomera303_00000201/controls/Total A energy',
@@ -171,7 +174,27 @@ function formatTimestamp(timestamp) {
   })
 }
 
-function HistoryChart({ points, chartId }) {
+function formatXLabel(timestamp, windowSize) {
+  const d = new Date(timestamp)
+  if (windowSize === '30d') {
+    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`
+  }
+  if (windowSize === '7d') {
+    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}ч`
+  }
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+function computeXTicks(minTime, maxTime, windowSize, count = 5) {
+  const ticks = []
+  for (let i = 0; i < count; i++) {
+    const t = minTime + (i / (count - 1)) * (maxTime - minTime)
+    ticks.push({ time: t, label: formatXLabel(t, windowSize) })
+  }
+  return ticks
+}
+
+function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) {
   if (!points.length) {
     return <div className="history-empty">Нет данных за выбранный период.</div>
   }
@@ -184,8 +207,14 @@ function HistoryChart({ points, chartId }) {
   const max = Math.max(...numbers)
   const range = max - min || 1
 
-  const chartPoints = points.map((point, index) => {
-    const x = padding + (index / Math.max(points.length - 1, 1)) * (width - padding * 2)
+  const times = points.map(p => new Date(p.timestamp).getTime()).filter(t => !Number.isNaN(t))
+  const minTime = Math.min(...times)
+  const maxTime = Math.max(...times)
+  const timeRange = maxTime - minTime || 1
+
+  const chartPoints = points.map(point => {
+    const t = new Date(point.timestamp).getTime()
+    const x = padding + ((t - minTime) / timeRange) * (width - padding * 2)
     const y = height - padding - ((point.value - min) / range) * (height - padding * 2)
     return [x, y]
   })
@@ -196,6 +225,7 @@ function HistoryChart({ points, chartId }) {
   const areaPath = `M ${first[0].toFixed(1)},${height - padding} ` +
     chartPoints.map(([x, y]) => `L ${x.toFixed(1)},${y.toFixed(1)}`).join(' ') +
     ` L ${last[0].toFixed(1)},${height - padding} Z`
+  const xTicks = computeXTicks(minTime, maxTime, windowSize)
 
   return (
     <div className="history-chart-shell">
@@ -204,22 +234,27 @@ function HistoryChart({ points, chartId }) {
         <span>{formatMetricValue((max + min) / 2)}</span>
         <span>{formatMetricValue(min)}</span>
       </div>
-      <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#44f6ff" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#44f6ff" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-        <path d={areaPath} fill={`url(#${chartId})`} />
-        <polyline points={polyline} fill="none" stroke="#44f6ff" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-        <circle cx={last[0].toFixed(1)} cy={last[1].toFixed(1)} r="5" fill="#44f6ff" />
-      </svg>
+      <div className="history-chart-col">
+        <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accentColor} stopOpacity="0.30" />
+              <stop offset="100%" stopColor={accentColor} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill={`url(#${chartId})`} />
+          <polyline points={polyline} fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+          <circle cx={last[0].toFixed(1)} cy={last[1].toFixed(1)} r="5" fill={accentColor} />
+        </svg>
+        <div className="history-xaxis">
+          {xTicks.map(tick => <span key={tick.time}>{tick.label}</span>)}
+        </div>
+      </div>
     </div>
   )
 }
 
-function MultiLineChart({ lines }) {
+function MultiLineChart({ lines, windowSize }) {
   const allPoints = lines.flatMap(line => line.points)
   if (!allPoints.length) {
     return <div className="history-empty">Нет данных за выбранный период.</div>
@@ -248,6 +283,8 @@ function MultiLineChart({ lines }) {
     return [x, y]
   }
 
+  const xTicks = computeXTicks(minTime, maxTime, windowSize)
+
   return (
     <div className="history-chart-shell">
       <div className="history-axis-labels">
@@ -255,35 +292,40 @@ function MultiLineChart({ lines }) {
         <span>{formatMetricValue((maxVal + minVal) / 2)}</span>
         <span>{formatMetricValue(minVal)}</span>
       </div>
-      <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-        {lines.map((line, lineIndex) => {
-          if (!line.points.length) return null
-          const chartPoints = line.points.map(mapXY)
-          const polyline = chartPoints
-            .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`)
-            .join(' ')
-          const last = chartPoints[chartPoints.length - 1]
-          return (
-            <g key={lineIndex}>
-              <polyline
-                points={polyline}
-                fill="none"
-                stroke={line.color}
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                opacity="0.9"
-              />
-              <circle
-                cx={last[0].toFixed(1)}
-                cy={last[1].toFixed(1)}
-                r="4.5"
-                fill={line.color}
-              />
-            </g>
-          )
-        })}
-      </svg>
+      <div className="history-chart-col">
+        <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          {lines.map((line, lineIndex) => {
+            if (!line.points.length) return null
+            const chartPoints = line.points.map(mapXY)
+            const polyline = chartPoints
+              .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`)
+              .join(' ')
+            const last = chartPoints[chartPoints.length - 1]
+            return (
+              <g key={lineIndex}>
+                <polyline
+                  points={polyline}
+                  fill="none"
+                  stroke={line.color}
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  opacity="0.9"
+                />
+                <circle
+                  cx={last[0].toFixed(1)}
+                  cy={last[1].toFixed(1)}
+                  r="4.5"
+                  fill={line.color}
+                />
+              </g>
+            )
+          })}
+        </svg>
+        <div className="history-xaxis">
+          {xTicks.map(tick => <span key={tick.time}>{tick.label}</span>)}
+        </div>
+      </div>
     </div>
   )
 }
@@ -296,7 +338,7 @@ function toChartId(topic) {
   return `history-fill-${topic.replace(/[^a-zA-Z0-9_-]/g, '_')}`
 }
 
-function SingleTopicCard({ item, loading }) {
+function SingleTopicCard({ item, loading, windowSize, accentColor = '#44f6ff' }) {
   const values = item.points.map(p => p.value)
   const latest = values.length ? values[values.length - 1] : 0
   const minimum = values.length ? Math.min(...values) : 0
@@ -305,7 +347,17 @@ function SingleTopicCard({ item, loading }) {
   const recentPoints = [...item.points].slice(-6).reverse()
 
   return (
-    <section className="history-topic-card">
+    <section className="history-topic-card history-electric-card">
+      <div className="history-electric-frame" aria-hidden="true">
+        <div className="history-border-outer">
+          <div className="history-main-card-layer"></div>
+        </div>
+        <div className="history-glow-layer-1"></div>
+        <div className="history-glow-layer-2"></div>
+        <div className="history-overlay-1"></div>
+        <div className="history-overlay-2"></div>
+        <div className="history-background-glow"></div>
+      </div>
       <div className="history-card-header">
         <div>
           <h3>{item.label}</h3>
@@ -333,7 +385,7 @@ function SingleTopicCard({ item, loading }) {
       </div>
       <div className="history-topic-grid">
         <section className="history-chart-card">
-          <HistoryChart points={item.points} chartId={toChartId(item.topic)} />
+          <HistoryChart points={item.points} chartId={toChartId(item.topic)} windowSize={windowSize} accentColor={accentColor} />
         </section>
         <section className="history-table-card">
           <div className="history-rows">
@@ -355,16 +407,26 @@ function SingleTopicCard({ item, loading }) {
   )
 }
 
-function GroupedTopicCard({ group, seriesByTopic, loading }) {
+function GroupedTopicCard({ group, seriesByTopic, loading, windowSize, phaseColors = PHASE_COLORS }) {
   const linesData = group.lines.map((line, i) => ({
     points: seriesByTopic[line.topic]?.points ?? [],
-    color: PHASE_COLORS[i % PHASE_COLORS.length],
+    color: phaseColors[i % phaseColors.length],
     label: line.label,
   }))
   const totalPts = linesData.reduce((n, l) => n + l.points.length, 0)
 
   return (
-    <section className="history-topic-card">
+    <section className="history-topic-card history-electric-card">
+      <div className="history-electric-frame" aria-hidden="true">
+        <div className="history-border-outer">
+          <div className="history-main-card-layer"></div>
+        </div>
+        <div className="history-glow-layer-1"></div>
+        <div className="history-glow-layer-2"></div>
+        <div className="history-overlay-1"></div>
+        <div className="history-overlay-2"></div>
+        <div className="history-background-glow"></div>
+      </div>
       <div className="history-card-header">
         <h3>{group.label}</h3>
         <span>{loading ? 'Загрузка...' : `${totalPts} точек`}</span>
@@ -398,7 +460,7 @@ function GroupedTopicCard({ group, seriesByTopic, loading }) {
         })}
       </div>
       <section className="history-chart-card">
-        <MultiLineChart lines={linesData} />
+        <MultiLineChart lines={linesData} windowSize={windowSize} />
         <div className="history-multiline-legend">
           {linesData.map((line, i) => (
             <div key={i} className="history-legend-item">
@@ -513,9 +575,16 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
           <div>
             <p className="history-kicker">История данных</p>
             <h2>{selectedArea?.label ?? 'Выберите метрику'}</h2>
-            <p className="history-subtitle">
-              Посмотрите, как менялись показатели оборудования за выбранный период
-            </p>
+            {selectedArea?.photo
+              ? <img
+                  src={selectedArea.photo}
+                  alt={selectedArea.label}
+                  className="history-area-photo"
+                />
+              : <p className="history-subtitle">
+                  Посмотрите, как менялись показатели оборудования за выбранный период
+                </p>
+            }
           </div>
           <div className="history-controls">
             <label className="history-control">
@@ -577,7 +646,7 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
                   {grouping.pinned.map(topic => {
                     const item = seriesByTopic[topic]
                     return item
-                      ? <SingleTopicCard key={topic} item={item} loading={loading} />
+                      ? <SingleTopicCard key={topic} item={item} loading={loading} windowSize={windowSize} accentColor={grouping.accentColor || '#44f6ff'} />
                       : null
                   })}
                   {grouping.groups.map(group => (
@@ -586,11 +655,13 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
                       group={group}
                       seriesByTopic={seriesByTopic}
                       loading={loading}
+                      windowSize={windowSize}
+                      phaseColors={grouping.phaseColors || PHASE_COLORS}
                     />
                   ))}
                 </>
               : series.map(item => (
-                  <SingleTopicCard key={item.topic} item={item} loading={loading} />
+                  <SingleTopicCard key={item.topic} item={item} loading={loading} windowSize={windowSize} />
                 ))
           )}
         </div>

@@ -20,6 +20,15 @@ export function NavigationMenu({ activeView, onViewChange }) {
         <span className="nav-icon">📊</span>
         <span className="nav-label">История<br/>данных</span>
       </button>
+
+      <button
+        className={`nav-button ${activeView === 'analytics' ? 'active' : ''}`}
+        onClick={() => onViewChange('analytics')}
+        title="Аналитика и показатели эффективности"
+      >
+        <span className="nav-icon">📈</span>
+        <span className="nav-label">Аналити<br/>ка</span>
+      </button>
     </nav>
   )
 }

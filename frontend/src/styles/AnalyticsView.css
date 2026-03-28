@@ -1,0 +1,47 @@
+.analytics-view {
+  width: 100%;
+  min-height: calc(100vh - 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.analytics-coming-soon {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(180deg, rgba(12, 20, 35, 0.92), rgba(10, 16, 28, 0.82));
+  border: 1px solid rgba(255, 216, 74, 0.25);
+  border-radius: 1.6rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 60px rgba(255, 216, 74, 0.06);
+  backdrop-filter: blur(14px);
+  max-width: 480px;
+}
+
+.analytics-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.2rem;
+  filter: drop-shadow(0 0 16px rgba(255, 216, 74, 0.5));
+}
+
+.analytics-coming-soon h2 {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  color: #ffd84a;
+  text-shadow: 0 0 18px rgba(255, 216, 74, 0.55);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.analytics-coming-soon p {
+  margin: 0 0 0.6rem;
+  color: rgba(238, 244, 255, 0.75);
+  line-height: 1.6;
+}
+
+.analytics-hint {
+  margin-top: 1.2rem !important;
+  font-size: 0.82rem;
+  color: rgba(255, 216, 74, 0.55) !important;
+  letter-spacing: 0.04em;
+}

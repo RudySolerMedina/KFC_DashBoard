@@ -16,20 +16,37 @@ dist-ssr
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
 .venv/
 venv/
+env/
+backend/.venv/
+backend/venv/
 *.egg-info/
 test_payload.py
+
+# Secrets / env files
+.env
+.env.*
+!.env.example
 backend/.env
+
+# Frontend build & deps
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 .vite/
+
+# Source photos (originals already copied to public/areas/)
+Photos/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+desktop.ini
 *.suo
 *.ntvs*
 *.njsproj

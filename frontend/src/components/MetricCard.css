@@ -135,3 +135,13 @@
   border-top: 1px solid rgba(68, 246, 255, 0.08);
   padding-top: 6px;
 }
+
+/* White values for all electrical metric groups */
+.group-total .metric-value,
+.group-voltages .metric-value,
+.group-currents .metric-value,
+.group-power .metric-value,
+.group-power-factor .metric-value {
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.35);
+}

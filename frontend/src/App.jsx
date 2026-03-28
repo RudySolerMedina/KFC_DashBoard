@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ConnectionStatus } from './components/ConnectionStatus'
 import { RealtimeView } from './components/RealtimeView'
 import { HistoricalView } from './components/HistoricalView'
+import { AnalyticsView } from './components/AnalyticsView'
 import { NavigationMenu } from './components/NavigationMenu'
 import './App.css'
 import './styles/NavigationMenu.css'
@@ -122,10 +123,14 @@ function App() {
       <NavigationMenu activeView={activeView} onViewChange={setActiveView} />
 
       <main className="container">
-        {activeView === 'realtime' ? (
+        {activeView === 'realtime' && (
           <RealtimeView metrics={metrics} values={values} histories={histories} />
-        ) : (
+        )}
+        {activeView === 'historical' && (
           <HistoricalView apiBaseUrl={API_BASE_URL} metrics={metrics} />
+        )}
+        {activeView === 'analytics' && (
+          <AnalyticsView />
         )}
       </main>
     </div>
