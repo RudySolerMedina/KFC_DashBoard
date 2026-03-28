@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { MetricCard } from './components/MetricCard'
 import { ConnectionStatus } from './components/ConnectionStatus'
+import { RealtimeView } from './components/RealtimeView'
+import { HistoricalView } from './components/HistoricalView'
+import { NavigationMenu } from './components/NavigationMenu'
 import './App.css'
+import './styles/NavigationMenu.css'
+import './styles/RealtimeView.css'
+import './styles/HistoricalView.css'
 
 const MAX_HISTORY = 60
 
@@ -11,6 +17,7 @@ function App() {
   const [histories, setHistories] = useState({})
   const [connected, setConnected] = useState(false)
   const [broker, setBroker] = useState('')
+  const [activeView, setActiveView] = useState('realtime')
   const wsRef = useRef(null)
 
   useEffect(() => {
@@ -131,38 +138,14 @@ function App() {
         </div>
       </header>
 
-      <main className="container">
-        <div className="groups-grid">
-          {groups.map(group => (
-            <section
-              key={group.id}
-              className={`metric-group electric-card group-${group.id.replace('_', '-')}`}
-            >
-              <div className="electric-frame" aria-hidden="true">
-                <div className="border-outer">
-                  <div className="main-card-layer"></div>
-                </div>
-                <div className="glow-layer-1"></div>
-                <div className="glow-layer-2"></div>
-                <div className="overlay-1"></div>
-                <div className="overlay-2"></div>
-                <div className="background-glow"></div>
-              </div>
+      <NavigationMenu activeView={activeView} onViewChange={setActiveView} />
 
-              <h2 className="group-title">{group.label}</h2>
-              <div className="metrics-row">
-                {group.metrics.map(metric => (
-                  <MetricCard
-                    key={metric.id}
-                    metric={metric}
-                    value={values[metric.topic]?.value}
-                    history={histories[metric.topic]}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+      <main className="container">
+        {activeView === 'realtime' ? (
+          <RealtimeView metrics={metrics} values={values} histories={histories} />
+        ) : (
+          <HistoricalView />
+        )}
       </main>
     </div>
   )
