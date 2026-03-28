@@ -72,8 +72,9 @@ function App() {
   }, [])
 
   // total first — hero position at the top
-  const groupOrder = ['total', 'voltages', 'currents', 'power', 'power_factor']
+  const groupOrder = ['total', 'microclimate', 'voltages', 'currents', 'power', 'power_factor']
   const groupLabels = {
+    microclimate: 'Микроклимат в ресторане KFC',
     voltages: 'Общее напряжение по фазам · Ресторан KFC',
     currents: 'Общий ток по фазам · Ресторан KFC',
     power: 'Общая мощность по фазам · Ресторан KFC',

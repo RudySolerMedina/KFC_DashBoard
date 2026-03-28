@@ -12,7 +12,7 @@ BROKER_HOST = "85.198.65.213"
 BROKER_PORT = 1883
 MQTT_CLIENT_ID = "kfc_dashboard_backend"
 
-# 14 electrical metrics only
+# Electrical + microclimate metrics
 TOPIC_DEFINITIONS = [
     {"id": "urms_l1", "label": "Напряжение L1", "topic": "Nevinnomisk/devices/energomera303_00000201/controls/Urms L1", "unit": "В", "group": "voltages"},
     {"id": "urms_l2", "label": "Напряжение L2", "topic": "Nevinnomisk/devices/energomera303_00000201/controls/Urms L2", "unit": "В", "group": "voltages"},
@@ -28,6 +28,14 @@ TOPIC_DEFINITIONS = [
     {"id": "pf_l3", "label": "КМ L3", "topic": "Nevinnomisk/devices/energomera303_00000201/controls/PF L3", "unit": "", "group": "power_factor"},
     {"id": "total_p", "label": "Общая мощность", "topic": "Nevinnomisk/devices/energomera303_00000201/controls/Total P", "unit": "Вт", "group": "total"},
     {"id": "total_energy", "label": "Энергия (итого)", "topic": "Nevinnomisk/devices/energomera303_00000201/controls/Total A energy", "unit": "кВтч", "group": "total"},
+    {"id": "indoor_temp", "label": "Температура", "topic": "Nevinnomisk/devices/wb-msw-v4_41/controls/Temperature", "unit": "°C", "group": "microclimate"},
+    {"id": "indoor_humidity", "label": "Влажность", "topic": "Nevinnomisk/devices/wb-msw-v4_41/controls/Humidity", "unit": "%", "group": "microclimate"},
+    {"id": "indoor_illuminance", "label": "Освещённость", "topic": "Nevinnomisk/devices/wb-msw-v4_41/controls/Illuminance", "unit": "лк", "group": "microclimate"},
+    {"id": "indoor_co2", "label": "CO2", "topic": "Nevinnomisk/devices/wb-msw-v4_41/controls/CO2", "unit": "ppm", "group": "microclimate"},
+    {"id": "indoor_voc", "label": "Качество воздуха (VOC)", "topic": "Nevinnomisk/devices/wb-msw-v4_41/controls/Air Quality (VOC)", "unit": "индекс", "group": "microclimate"},
+    {"id": "outdoor_temp", "label": "Температура на улице", "topic": "Nevinnomisk/devices/weather_owm/controls/Температура", "unit": "°C", "group": "microclimate"},
+    {"id": "outdoor_humidity", "label": "Влажность на улице", "topic": "Nevinnomisk/devices/weather_owm/controls/Влажность", "unit": "%", "group": "microclimate"},
+    {"id": "outdoor_wind", "label": "Скорость ветра на улице", "topic": "Nevinnomisk/devices/weather_owm/controls/Ветер", "unit": "м/с", "group": "microclimate"},
 ]
 
 
