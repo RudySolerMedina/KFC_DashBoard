@@ -217,13 +217,13 @@ class Database:
         finally:
             self.pool.putconn(connection)
 
-    def insert_rows(self, rows: list[tuple[str, str, float | None, str]]) -> int:
+    def insert_rows(self, rows: list[tuple[str, str, float | None, str, datetime]]) -> int:
         if not rows:
             return 0
         with self.connection() as connection:
             with connection.cursor() as cursor:
                 insert_sql = sql.SQL(
-                    'INSERT INTO {} (device, sensor, value, topic) VALUES %s'
+                    'INSERT INTO {} (device, sensor, value, topic, timestamp) VALUES %s'
                 ).format(qualified_table(self.settings))
                 execute_values(cursor, insert_sql.as_string(connection), rows, page_size=500)
             connection.commit()
@@ -321,21 +321,27 @@ class DashboardState:
 
     async def flush_pending(self) -> None:
         if not self.pending_flush:
+            logging.debug('No pending rows to flush')
             return
         batch = list(self.pending_flush.values())
+        batch_size = len(batch)
+        logging.info('Flushing %d rows to PostgreSQL', batch_size)
         self.pending_flush.clear()
         try:
             inserted = await asyncio.to_thread(self.database.insert_rows, batch)
-            logging.info('Inserted %s rows into PostgreSQL', inserted)
+            logging.info('Successfully inserted %d rows into PostgreSQL', inserted)
         except Exception as error:
             logging.error('PostgreSQL batch insert failed: %s', error)
             for row in batch:
                 self.pending_flush[row[3]] = row
 
     async def flush_loop(self) -> None:
+        logging.info('Flush loop started, interval: %d seconds', self.settings.flush_interval_seconds)
         while True:
             await asyncio.sleep(self.settings.flush_interval_seconds)
+            logging.info('Flush cycle starting, pending rows: %d', len(self.pending_flush))
             await self.flush_pending()
+            logging.info('Flush cycle complete')
 
 
 DATABASE = Database(SETTINGS)
@@ -345,8 +351,12 @@ STATE = DashboardState(SETTINGS, DATABASE)
 def on_mqtt_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         logging.info('MQTT connected to %s:%s', SETTINGS.mqtt_broker, SETTINGS.mqtt_port)
+        subscribed_count = 0
         for metric in TOPIC_DEFINITIONS:
-            client.subscribe(metric['topic'], qos=1)
+            result = client.subscribe(metric['topic'], qos=1)
+            if result[0] == 0:
+                subscribed_count += 1
+        logging.info('Successfully subscribed to %d topics', subscribed_count)
     else:
         logging.error('MQTT connection failed: %s', reason_code)
 
@@ -359,10 +369,30 @@ def on_mqtt_message(client, userdata, msg):
     try:
         payload = msg.payload.decode('utf-8')
         value = float(payload)
-        STATE.pending_flush[msg.topic] = (msg.topic, value, datetime.utcnow())
-        asyncio.run_coroutine_threadsafe(handle_message(), STATE.loop)
+        
+        # Parse MQTT topic: Nevinnomisk/devices/{device}/controls/{sensor}
+        parts = msg.topic.split('/')
+        device = parts[2] if len(parts) > 2 else 'unknown'
+        sensor = parts[4] if len(parts) > 4 else 'unknown'
+        
+        # Update real-time values and publish to WebSocket clients
+        now = datetime.utcnow()
+        now_ts = now.timestamp()
+        
+        # Update STATE.latest for immediate API responses
+        STATE.latest[msg.topic] = {
+            'value': value,
+            'ts': now_ts,
+        }
+        
+        # Publish to all WebSocket clients
+        asyncio.run_coroutine_threadsafe(STATE.publish_metric(msg.topic, value, now_ts), STATE.loop)
+        
+        # Store as (device, sensor, value, topic, timestamp) for database flush
+        STATE.pending_flush[msg.topic] = (device, sensor, value, msg.topic, now)
+        logging.info('Updated: %s/%s = %s', device, sensor, value)
     except ValueError:
-        logging.debug('Could not decode MQTT payload: %s', msg.payload)
+        logging.debug('Could not decode MQTT payload on %s: %s', msg.topic, msg.payload)
     except Exception as error:
         logging.error('MQTT message handling error: %s', error)
 
