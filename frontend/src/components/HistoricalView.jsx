@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import '../styles/HistoricalView.css'
 
 const RANGE_OPTIONS = [
@@ -8,6 +8,144 @@ const RANGE_OPTIONS = [
   { value: '7d', label: '7 дней' },
   { value: '30d', label: '30 дней' }
 ]
+
+const AREA_OPTIONS = [
+  {
+    id: 'total_kfc',
+    label: 'Общая нагрузка, KFC',
+    topics: [
+      'Nevinnomisk/devices/energomera303_00000201/controls/Urms L1',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Urms L2',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Urms L3',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Irms L1',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Irms L2',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Irms L3',
+      'Nevinnomisk/devices/energomera303_00000201/controls/P L1',
+      'Nevinnomisk/devices/energomera303_00000201/controls/P L2',
+      'Nevinnomisk/devices/energomera303_00000201/controls/P L3',
+      'Nevinnomisk/devices/energomera303_00000201/controls/PF L1',
+      'Nevinnomisk/devices/energomera303_00000201/controls/PF L2',
+      'Nevinnomisk/devices/energomera303_00000201/controls/PF L3',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Total P',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Total A energy'
+    ]
+  },
+  { id: 'f100_left', label: 'F100 Левая (Закрытые жаровни:1.1)', topics: [] },
+  { id: 'f100_right', label: 'F100 Правая (Закрытые жаровни:1.2)', topics: [] },
+  { id: 'fastron_1_left', label: 'FASTRON_1 Левая (Открытые жаровни:2.1)', topics: [] },
+  { id: 'fastron_2_mid', label: 'FASTRON_2 Средная (Открытые жаровни:2.2)', topics: [] },
+  { id: 'fastron_3_right', label: 'FASTRON_3 Правая (Открытые жаровни:2.3)', topics: [] },
+  { id: 'eee_142_right', label: 'Жаровня EEE 142 правая (Фритюрница на кухне картофеля фри:3.2)', topics: [] },
+  { id: 'eee_142_left', label: 'Жаровня EEE 142 левая (Фритюрница на кухне картофеля фри:3.1)', topics: [] },
+  { id: 'heat_cab', label: 'ТЕПЛОВОЙ ШКАФ', topics: [] },
+  { id: 'follett_1050', label: 'Шкаф тепловой FOLLETT 1050BK (Тепловая витрина)', topics: [] },
+  { id: 'toaster_vertical', label: 'ТОСТЕР ВЕРТИКАЛЬНЫЙ', topics: [] },
+  { id: 'toaster_horizontal', label: 'ТОСТЕР ГОРИЗОНТАЛЬНЫЙ', topics: [] },
+  { id: 'heat_903_12', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.2)', topics: [] },
+  { id: 'heat_903_11', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.1)', topics: [] },
+  { id: 'heat_903_13', label: 'Тепловой шкаф 903 (Тепловой шкаф на кухне 1.3)', topics: [] },
+  { id: 'silain', label: 'Силайн (очень малый тепловой шкаф)', topics: [] },
+  { id: 'freezer_1', label: 'Морозильная камера 1', topics: [] },
+  { id: 'freezer_2', label: 'Морозильная камера 2', topics: [] },
+  { id: 'cold_veg', label: 'Холодильная камера (овощн.)', topics: [] },
+  { id: 'cold_defrost_chicken', label: 'Холодильная камера (дефрост) для курицы', topics: [] },
+  { id: 'coffee_1', label: 'Кофемашина 1', topics: [] },
+  { id: 'coffee_2', label: 'Кофемашина 2', topics: [] },
+  { id: 'salad_fridge', label: 'Холодильник саладет', topics: [] },
+  { id: 'boiler_1', label: 'Бойлер 1', topics: [] },
+  { id: 'boiler_2', label: 'Бойлер 2', topics: [] },
+  { id: 'cocktail', label: 'Коктельница', topics: [] },
+  { id: 'heat_curtain', label: 'Тепловая завесы', topics: [] },
+  { id: 'ac', label: 'Кондиционеры', topics: [] },
+  { id: 'heaters', label: 'Обогреватели', topics: [] },
+  { id: 'outdoor_light', label: 'Уличное освещение', topics: [] },
+  { id: 'rest_light_group', label: 'Группа Освещение в ресторане', topics: [] },
+  { id: 'vent_panel_1', label: 'ЩИТ вентиляции 1', topics: [] },
+  {
+    id: 'hall_1',
+    label: 'ЗАЛ ДЛЯ ПОСЕТИТЕЛЕЙ (1)',
+    topics: [
+      'Nevinnomisk/devices/wb-msw-v4_41/controls/Temperature',
+      'Nevinnomisk/devices/wb-msw-v4_41/controls/Humidity',
+      'Nevinnomisk/devices/wb-msw-v4_41/controls/Illuminance',
+      'Nevinnomisk/devices/wb-msw-v4_41/controls/CO2',
+      'Nevinnomisk/devices/wb-msw-v4_41/controls/Air Quality (VOC)',
+      'Nevinnomisk/devices/wb-msw-v4_41/controls/Sound Level'
+    ]
+  },
+  { id: 'hall_2', label: 'ЗАЛ ДЛЯ ПОСЕТИТЕЛЕЙ (2)', topics: [] },
+  { id: 'payment_zone', label: 'ЗОНА ОПЛАТЫ ЗАКАЗА', topics: [] },
+  { id: 'corridor', label: 'КОРИДОР', topics: [] },
+  { id: 'hot_shop_bread', label: 'ГОРЯЧИЙ ЦЕХ И ПАНИРОВОЧНАЯ', topics: [] },
+  { id: 'distribution', label: 'РАЗДАТОЧНАЯ', topics: [] },
+  { id: 'cold_defrost_chicken_caps', label: 'ХОЛОДИЛЬНАЯ КАМЕРА (ДЕФРОСТ) ДЛЯ КУРИЦЫ', topics: [] },
+  { id: 'freezer_1_caps', label: 'МОРОЗИЛЬНАЯ КАМЕРА 1', topics: [] },
+  { id: 'freezer_2_caps', label: 'МОРОЗИЛЬНАЯ КАМЕРА 2', topics: [] },
+  { id: 'cold_veg_caps', label: 'ХОЛОДИЛЬНАЯ КАМЕРА (ОВОЩН.)', topics: [] },
+  { id: 'technical_boilers', label: 'ТЕХНИЧЕСКОЕ ПОМЕЩЕНИЕ (БОЙЛЕРЫ)', topics: [] },
+  {
+    id: 'weather',
+    label: 'Погода',
+    topics: [
+      'Nevinnomisk/devices/weather_owm/controls/Температура',
+      'Nevinnomisk/devices/weather_owm/controls/Влажность',
+      'Nevinnomisk/devices/weather_owm/controls/Ветер'
+    ]
+  }
+]
+
+const PHASE_COLORS = ['#44f6ff', '#fbbf24', '#4ade80']
+
+const AREA_GROUPING = {
+  total_kfc: {
+    pinned: [
+      'Nevinnomisk/devices/energomera303_00000201/controls/Total P',
+      'Nevinnomisk/devices/energomera303_00000201/controls/Total A energy',
+    ],
+    groups: [
+      {
+        id: 'voltage_phases',
+        label: 'Напряжение по фазам',
+        unit: 'В',
+        lines: [
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/Urms L1', label: 'Линия L1' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/Urms L2', label: 'Линия L2' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/Urms L3', label: 'Линия L3' },
+        ]
+      },
+      {
+        id: 'current_phases',
+        label: 'Ток по фазам',
+        unit: 'А',
+        lines: [
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/Irms L1', label: 'Линия L1' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/Irms L2', label: 'Линия L2' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/Irms L3', label: 'Линия L3' },
+        ]
+      },
+      {
+        id: 'power_phases',
+        label: 'Мощность по фазам',
+        unit: 'кВт',
+        lines: [
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/P L1', label: 'Линия L1' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/P L2', label: 'Линия L2' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/P L3', label: 'Линия L3' },
+        ]
+      },
+      {
+        id: 'pf_phases',
+        label: 'Коэффициент мощности по фазам',
+        unit: '',
+        lines: [
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/PF L1', label: 'Линия L1' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/PF L2', label: 'Линия L2' },
+          { topic: 'Nevinnomisk/devices/energomera303_00000201/controls/PF L3', label: 'Линия L3' },
+        ]
+      },
+    ]
+  }
+}
 
 function formatMetricValue(value) {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -33,7 +171,7 @@ function formatTimestamp(timestamp) {
   })
 }
 
-function HistoryChart({ points }) {
+function HistoryChart({ points, chartId }) {
   if (!points.length) {
     return <div className="history-empty">Нет данных за выбранный период.</div>
   }
@@ -68,12 +206,12 @@ function HistoryChart({ points }) {
       </div>
       <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
         <defs>
-          <linearGradient id="history-fill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#44f6ff" stopOpacity="0.35" />
             <stop offset="100%" stopColor="#44f6ff" stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        <path d={areaPath} fill="url(#history-fill)" />
+        <path d={areaPath} fill={`url(#${chartId})`} />
         <polyline points={polyline} fill="none" stroke="#44f6ff" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
         <circle cx={last[0].toFixed(1)} cy={last[1].toFixed(1)} r="5" fill="#44f6ff" />
       </svg>
@@ -81,21 +219,221 @@ function HistoryChart({ points }) {
   )
 }
 
+function MultiLineChart({ lines }) {
+  const allPoints = lines.flatMap(line => line.points)
+  if (!allPoints.length) {
+    return <div className="history-empty">Нет данных за выбранный период.</div>
+  }
+
+  const width = 960
+  const height = 280
+  const padding = 22
+
+  const allValues = allPoints.map(p => p.value)
+  const allTimes = allPoints
+    .map(p => new Date(p.timestamp).getTime())
+    .filter(t => !Number.isNaN(t))
+
+  const minVal = Math.min(...allValues)
+  const maxVal = Math.max(...allValues)
+  const valRange = maxVal - minVal || 1
+  const minTime = Math.min(...allTimes)
+  const maxTime = Math.max(...allTimes)
+  const timeRange = maxTime - minTime || 1
+
+  function mapXY(point) {
+    const t = new Date(point.timestamp).getTime()
+    const x = padding + ((t - minTime) / timeRange) * (width - padding * 2)
+    const y = height - padding - ((point.value - minVal) / valRange) * (height - padding * 2)
+    return [x, y]
+  }
+
+  return (
+    <div className="history-chart-shell">
+      <div className="history-axis-labels">
+        <span>{formatMetricValue(maxVal)}</span>
+        <span>{formatMetricValue((maxVal + minVal) / 2)}</span>
+        <span>{formatMetricValue(minVal)}</span>
+      </div>
+      <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+        {lines.map((line, lineIndex) => {
+          if (!line.points.length) return null
+          const chartPoints = line.points.map(mapXY)
+          const polyline = chartPoints
+            .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`)
+            .join(' ')
+          const last = chartPoints[chartPoints.length - 1]
+          return (
+            <g key={lineIndex}>
+              <polyline
+                points={polyline}
+                fill="none"
+                stroke={line.color}
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                opacity="0.9"
+              />
+              <circle
+                cx={last[0].toFixed(1)}
+                cy={last[1].toFixed(1)}
+                r="4.5"
+                fill={line.color}
+              />
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
+function topicTail(topic) {
+  return topic.split('/').pop() || topic
+}
+
+function toChartId(topic) {
+  return `history-fill-${topic.replace(/[^a-zA-Z0-9_-]/g, '_')}`
+}
+
+function SingleTopicCard({ item, loading }) {
+  const values = item.points.map(p => p.value)
+  const latest = values.length ? values[values.length - 1] : 0
+  const minimum = values.length ? Math.min(...values) : 0
+  const maximum = values.length ? Math.max(...values) : 0
+  const average = values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : 0
+  const recentPoints = [...item.points].slice(-6).reverse()
+
+  return (
+    <section className="history-topic-card">
+      <div className="history-card-header">
+        <div>
+          <h3>{item.label}</h3>
+          <span className="history-topic-path">{item.topic}</span>
+        </div>
+        <span>{loading ? 'Загрузка...' : `${item.points.length} точек`}</span>
+      </div>
+      <div className="history-stats mini">
+        <article className="history-stat-card">
+          <span>Последнее</span>
+          <strong>{formatMetricValue(latest)} {item.unit}</strong>
+        </article>
+        <article className="history-stat-card">
+          <span>Минимум</span>
+          <strong>{formatMetricValue(minimum)} {item.unit}</strong>
+        </article>
+        <article className="history-stat-card">
+          <span>Максимум</span>
+          <strong>{formatMetricValue(maximum)} {item.unit}</strong>
+        </article>
+        <article className="history-stat-card">
+          <span>Среднее</span>
+          <strong>{formatMetricValue(average)} {item.unit}</strong>
+        </article>
+      </div>
+      <div className="history-topic-grid">
+        <section className="history-chart-card">
+          <HistoryChart points={item.points} chartId={toChartId(item.topic)} />
+        </section>
+        <section className="history-table-card">
+          <div className="history-rows">
+            {recentPoints.length
+              ? recentPoints.map(point => (
+                  <div
+                    key={`${item.topic}-${point.timestamp}-${point.value}`}
+                    className="history-row"
+                  >
+                    <span>{formatTimestamp(point.timestamp)}</span>
+                    <strong>{formatMetricValue(point.value)} {item.unit}</strong>
+                  </div>
+                ))
+              : <div className="history-empty">Нет данных за выбранный период.</div>}
+          </div>
+        </section>
+      </div>
+    </section>
+  )
+}
+
+function GroupedTopicCard({ group, seriesByTopic, loading }) {
+  const linesData = group.lines.map((line, i) => ({
+    points: seriesByTopic[line.topic]?.points ?? [],
+    color: PHASE_COLORS[i % PHASE_COLORS.length],
+    label: line.label,
+  }))
+  const totalPts = linesData.reduce((n, l) => n + l.points.length, 0)
+
+  return (
+    <section className="history-topic-card">
+      <div className="history-card-header">
+        <h3>{group.label}</h3>
+        <span>{loading ? 'Загрузка...' : `${totalPts} точек`}</span>
+      </div>
+      <div className="history-stats mini">
+        {linesData.map((line, i) => {
+          const vals = line.points.map(p => p.value)
+          const last = vals.length ? vals[vals.length - 1] : null
+          const minV = vals.length ? Math.min(...vals) : null
+          const maxV = vals.length ? Math.max(...vals) : null
+          return (
+            <article
+              key={i}
+              className="history-stat-card"
+              style={{ borderLeft: `3px solid ${line.color}` }}
+            >
+              <span style={{ color: line.color }}>{line.label}</span>
+              <strong style={{ color: line.color }}>
+                {last !== null
+                  ? `${formatMetricValue(last)}${group.unit ? ' ' + group.unit : ''}`
+                  : '—'}
+              </strong>
+              {minV !== null && (
+                <small>
+                  {formatMetricValue(minV)} – {formatMetricValue(maxV)}
+                  {group.unit ? ` ${group.unit}` : ''}
+                </small>
+              )}
+            </article>
+          )
+        })}
+      </div>
+      <section className="history-chart-card">
+        <MultiLineChart lines={linesData} />
+        <div className="history-multiline-legend">
+          {linesData.map((line, i) => (
+            <div key={i} className="history-legend-item">
+              <span className="history-legend-dot" style={{ background: line.color }} />
+              <span>{line.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </section>
+  )
+}
+
 export function HistoricalView({ apiBaseUrl, metrics }) {
-  const [selectedTopic, setSelectedTopic] = useState('')
+  const [selectedAreaId, setSelectedAreaId] = useState(AREA_OPTIONS[0].id)
   const [windowSize, setWindowSize] = useState('24h')
-  const [points, setPoints] = useState([])
+  const [series, setSeries] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (!selectedTopic && metrics.length) {
-      setSelectedTopic(metrics[0].topic)
-    }
-  }, [metrics, selectedTopic])
+  const metricByTopic = useMemo(
+    () => Object.fromEntries(metrics.map(metric => [metric.topic, metric])),
+    [metrics]
+  )
+  const selectedArea = AREA_OPTIONS.find(area => area.id === selectedAreaId) || AREA_OPTIONS[0]
 
   useEffect(() => {
-    if (!selectedTopic) {
+    if (!selectedArea) {
+      return undefined
+    }
+
+    if (!selectedArea.topics.length) {
+      setSeries([])
+      setError('')
+      setLoading(false)
       return undefined
     }
 
@@ -103,23 +441,36 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
     setLoading(true)
     setError('')
 
-    fetch(`${apiBaseUrl}/api/history?topic=${encodeURIComponent(selectedTopic)}&window=${windowSize}`, {
-      signal: controller.signal
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Не удалось загрузить историю')
-        }
-        return response.json()
-      })
-      .then(data => {
-        const nextPoints = (data.points || [])
-          .filter(point => typeof point.value === 'number')
-          .map(point => ({
-            timestamp: point.timestamp,
-            value: point.value
-          }))
-        setPoints(nextPoints)
+    Promise.all(
+      selectedArea.topics.map(topic =>
+        fetch(`${apiBaseUrl}/api/history?topic=${encodeURIComponent(topic)}&window=${windowSize}`, {
+          signal: controller.signal
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Не удалось загрузить историю')
+            }
+            return response.json()
+          })
+          .then(data => {
+            const points = (data.points || [])
+              .filter(point => typeof point.value === 'number')
+              .map(point => ({
+                timestamp: point.timestamp,
+                value: point.value
+              }))
+            const metric = metricByTopic[topic]
+            return {
+              topic,
+              label: metric?.label || topicTail(topic),
+              unit: metric?.unit || '',
+              points
+            }
+          })
+      )
+    )
+      .then(nextSeries => {
+        setSeries(nextSeries)
       })
       .catch(fetchError => {
         if (fetchError.name !== 'AbortError') {
@@ -133,15 +484,16 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
       })
 
     return () => controller.abort()
-  }, [apiBaseUrl, selectedTopic, windowSize])
+  }, [apiBaseUrl, metricByTopic, selectedArea, windowSize])
 
-  const selectedMetric = metrics.find(metric => metric.topic === selectedTopic)
-  const values = points.map(point => point.value)
-  const latest = values.length ? values[values.length - 1] : 0
-  const minimum = values.length ? Math.min(...values) : 0
-  const maximum = values.length ? Math.max(...values) : 0
-  const average = values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0
-  const recentPoints = [...points].slice(-8).reverse()
+  const topicsConfigured = selectedArea?.topics.length || 0
+  const topicsWithData = series.filter(item => item.points.length > 0).length
+  const totalPoints = series.reduce((sum, item) => sum + item.points.length, 0)
+  const latestTimestamp = series
+    .flatMap(item => item.points.map(point => point.timestamp))
+    .filter(Boolean)
+    .sort()
+    .pop()
 
   if (!metrics.length) {
     return (
@@ -151,24 +503,27 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
     )
   }
 
+  const grouping = AREA_GROUPING[selectedAreaId]
+  const seriesByTopic = Object.fromEntries(series.map(s => [s.topic, s]))
+
   return (
     <div className="historical-view">
       <section className="history-panel">
         <div className="history-header">
           <div>
             <p className="history-kicker">История данных</p>
-            <h2>{selectedMetric?.label ?? 'Выберите метрику'}</h2>
+            <h2>{selectedArea?.label ?? 'Выберите метрику'}</h2>
             <p className="history-subtitle">
-              Исторические значения из PostgreSQL по topic <span>{selectedTopic || '—'}</span>
+              Посмотрите, как менялись показатели оборудования за выбранный период
             </p>
           </div>
           <div className="history-controls">
             <label className="history-control">
               <span>Метрика</span>
-              <select value={selectedTopic} onChange={event => setSelectedTopic(event.target.value)}>
-                {metrics.map(metric => (
-                  <option key={metric.topic} value={metric.topic}>
-                    {metric.label}
+              <select value={selectedAreaId} onChange={event => setSelectedAreaId(event.target.value)}>
+                {AREA_OPTIONS.map(area => (
+                  <option key={area.id} value={area.id}>
+                    {area.label}
                   </option>
                 ))}
               </select>
@@ -190,46 +545,54 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
 
         <div className="history-stats">
           <article className="history-stat-card">
-            <span>Последнее</span>
-            <strong>{formatMetricValue(latest)} {selectedMetric?.unit}</strong>
+            <span>Топиков в метрике</span>
+            <strong>{topicsConfigured}</strong>
           </article>
           <article className="history-stat-card">
-            <span>Минимум</span>
-            <strong>{formatMetricValue(minimum)} {selectedMetric?.unit}</strong>
+            <span>С данными</span>
+            <strong>{topicsWithData}</strong>
           </article>
           <article className="history-stat-card">
-            <span>Максимум</span>
-            <strong>{formatMetricValue(maximum)} {selectedMetric?.unit}</strong>
+            <span>Всего точек</span>
+            <strong>{totalPoints}</strong>
           </article>
           <article className="history-stat-card">
-            <span>Среднее</span>
-            <strong>{formatMetricValue(average)} {selectedMetric?.unit}</strong>
+            <span>Последнее обновление</span>
+            <strong>{formatTimestamp(latestTimestamp)}</strong>
           </article>
         </div>
 
-        <div className="history-content-grid">
-          <section className="history-chart-card">
-            <div className="history-card-header">
-              <h3>График за период</h3>
-              <span>{loading ? 'Загрузка...' : `${points.length} точек`}</span>
+        <div className="history-series-list">
+          {!selectedArea.topics.length && (
+            <div className="history-chart-card">
+              <div className="history-empty">Для этой метрики пока не привязаны topics.</div>
             </div>
-            {error ? <div className="history-error">{error}</div> : <HistoryChart points={points} />}
-          </section>
+          )}
 
-          <section className="history-table-card">
-            <div className="history-card-header">
-              <h3>Последние записи</h3>
-              <span>{windowSize}</span>
-            </div>
-            <div className="history-rows">
-              {recentPoints.length ? recentPoints.map(point => (
-                <div key={`${point.timestamp}-${point.value}`} className="history-row">
-                  <span>{formatTimestamp(point.timestamp)}</span>
-                  <strong>{formatMetricValue(point.value)} {selectedMetric?.unit}</strong>
-                </div>
-              )) : <div className="history-empty">Нет данных за выбранный период.</div>}
-            </div>
-          </section>
+          {error && <div className="history-error">{error}</div>}
+
+          {!error && selectedArea.topics.length > 0 && (
+            grouping
+              ? <>
+                  {grouping.pinned.map(topic => {
+                    const item = seriesByTopic[topic]
+                    return item
+                      ? <SingleTopicCard key={topic} item={item} loading={loading} />
+                      : null
+                  })}
+                  {grouping.groups.map(group => (
+                    <GroupedTopicCard
+                      key={group.id}
+                      group={group}
+                      seriesByTopic={seriesByTopic}
+                      loading={loading}
+                    />
+                  ))}
+                </>
+              : series.map(item => (
+                  <SingleTopicCard key={item.topic} item={item} loading={loading} />
+                ))
+          )}
         </div>
       </section>
     </div>
