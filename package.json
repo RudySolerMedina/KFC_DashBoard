@@ -1,0 +1,19 @@
+{
+  "name": "kfc-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard de electroconsumo KFC en tiempo real",
+  "main": "ecosystem.config.js",
+  "scripts": {
+    "start": "pm2 start ecosystem.config.js --no-daemon",
+    "start:daemon": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop all",
+    "restart": "pm2 restart all",
+    "status": "pm2 status",
+    "logs": "pm2 logs",
+    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8080 --reload\"",
+    "build": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
