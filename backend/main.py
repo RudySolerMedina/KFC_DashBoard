@@ -33,6 +33,7 @@ class Settings:
     api_host: str = os.getenv('API_HOST', '127.0.0.1')
     api_port: int = int(os.getenv('API_PORT', '8080'))
     flush_interval_seconds: int = int(os.getenv('FLUSH_INTERVAL_SECONDS', '60'))
+    db_reconnect_interval_seconds: int = int(os.getenv('DB_RECONNECT_INTERVAL_SECONDS', '10'))
     db_host: str = os.getenv('DB_HOST', 'localhost')
     db_port: int = int(os.getenv('DB_PORT', '5432'))
     db_database: str = os.getenv('DB_DATABASE', 'dbo')
@@ -88,6 +89,8 @@ def parse_window(window: str) -> timedelta:
         '24h': timedelta(hours=24),
         '7d': timedelta(days=7),
         '30d': timedelta(days=30),
+        '90d': timedelta(days=90),
+        '1y': timedelta(days=365),
     }
     try:
         return mapping[window]
@@ -135,6 +138,10 @@ class Database:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.pool: pool.ThreadedConnectionPool | None = None
+
+    @property
+    def is_connected(self) -> bool:
+        return self.pool is not None
 
     def ensure_schema(self, connection) -> None:
         table_ref = qualified_table(self.settings)
@@ -187,9 +194,11 @@ class Database:
         connection.commit()
 
     def connect(self) -> None:
+        if self.pool:
+            self.close()
         self.pool = pool.ThreadedConnectionPool(
-            minconn=1,
-            maxconn=10,
+            minconn=2,
+            maxconn=20,
             host=self.settings.db_host,
             port=self.settings.db_port,
             database=self.settings.db_database,
@@ -294,13 +303,34 @@ class DashboardState:
         self.loop: asyncio.AbstractEventLoop | None = None
         self.mqtt_client: mqtt.Client | None = None
         self.flush_task: asyncio.Task | None = None
+        self.db_reconnect_task: asyncio.Task | None = None
+        self.db_available = False
 
     async def load_initial_state(self) -> None:
+        if not self.database.is_connected:
+            self.db_available = False
+            return
         try:
             self.latest = await asyncio.to_thread(self.database.fetch_latest_values)
+            self.db_available = True
             logging.info('Loaded %s latest values from PostgreSQL', len(self.latest))
         except Exception as error:
+            self.db_available = False
             logging.warning('Could not prefill latest values from PostgreSQL: %s', error)
+
+    async def ensure_database_connection(self) -> bool:
+        if self.database.is_connected:
+            self.db_available = True
+            return True
+        try:
+            await asyncio.to_thread(self.database.connect)
+            self.db_available = True
+            logging.info('PostgreSQL connection restored')
+            return True
+        except Exception as error:
+            self.db_available = False
+            logging.warning('PostgreSQL unavailable, realtime will continue without history persistence: %s', error)
+            return False
 
     async def publish_metric(self, topic: str, value: float, ts: float) -> None:
         self.latest[topic] = {'value': value, 'ts': ts}
@@ -324,14 +354,21 @@ class DashboardState:
         if not self.pending_flush:
             logging.debug('No pending rows to flush')
             return
+        if not self.database.is_connected:
+            self.db_available = False
+            logging.warning('Skipping PostgreSQL flush because database is disconnected')
+            return
         batch = list(self.pending_flush.values())
         batch_size = len(batch)
         logging.info('Flushing %d rows to PostgreSQL', batch_size)
         self.pending_flush.clear()
         try:
             inserted = await asyncio.to_thread(self.database.insert_rows, batch)
+            self.db_available = True
             logging.info('Successfully inserted %d rows into PostgreSQL', inserted)
         except Exception as error:
+            self.db_available = False
+            self.database.close()
             logging.error('PostgreSQL batch insert failed: %s', error)
             for row in batch:
                 self.pending_flush[row[3]] = row
@@ -343,6 +380,14 @@ class DashboardState:
             logging.info('Flush cycle starting, pending rows: %d', len(self.pending_flush))
             await self.flush_pending()
             logging.info('Flush cycle complete')
+
+    async def db_reconnect_loop(self) -> None:
+        logging.info('DB reconnect loop started, interval: %d seconds', self.settings.db_reconnect_interval_seconds)
+        while True:
+            await asyncio.sleep(self.settings.db_reconnect_interval_seconds)
+            if self.database.is_connected:
+                continue
+            await self.ensure_database_connection()
 
 
 DATABASE = Database(SETTINGS)
@@ -406,9 +451,10 @@ async def handle_message() -> None:
 async def lifespan(app: FastAPI):
     logging.info('Starting backend services')
     STATE.loop = asyncio.get_running_loop()
-    DATABASE.connect()
+    await STATE.ensure_database_connection()
     await STATE.load_initial_state()
     STATE.flush_task = asyncio.create_task(STATE.flush_loop())
+    STATE.db_reconnect_task = asyncio.create_task(STATE.db_reconnect_loop())
 
     mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=SETTINGS.mqtt_client_id)
     mqtt_client.on_connect = on_mqtt_connect
@@ -424,6 +470,10 @@ async def lifespan(app: FastAPI):
     yield
 
     logging.info('Stopping backend services')
+    if STATE.db_reconnect_task:
+        STATE.db_reconnect_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await STATE.db_reconnect_task
     if STATE.flush_task:
         STATE.flush_task.cancel()
         with contextlib.suppress(asyncio.CancelledError):
@@ -455,6 +505,7 @@ async def metrics() -> JSONResponse:
     return JSONResponse(
         {
             'broker': SETTINGS.mqtt_broker,
+            'database_connected': STATE.db_available,
             'metrics': TOPIC_DEFINITIONS,
             'values': STATE.latest,
         }
@@ -467,6 +518,9 @@ async def history(
     window: str = Query('24h'),
     limit: int = Query(1440, ge=1, le=10000),
 ) -> JSONResponse:
+    if not DATABASE.is_connected:
+        raise HTTPException(status_code=503, detail='History unavailable: database disconnected')
+
     end_at = datetime.now()
     start_at = end_at - parse_window(window)
     try:

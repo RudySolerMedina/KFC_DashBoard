@@ -412,6 +412,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  position: relative;
 }
 
 .history-xaxis {
@@ -421,6 +422,36 @@
   color: rgba(238, 244, 255, 0.42);
   font-size: 0.7rem;
   line-height: 1;
+}
+
+.history-chart-tooltip {
+  position: absolute;
+  z-index: 6;
+  transform: translate(-50%, calc(-100% - 10px));
+  pointer-events: none;
+  display: grid;
+  gap: 0.2rem;
+  min-width: 140px;
+  max-width: 240px;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(10, 18, 34, 0.92);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+  color: #eef4ff;
+  backdrop-filter: blur(3px);
+}
+
+.history-chart-tooltip strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.history-chart-tooltip span {
+  font-size: 0.72rem;
+  line-height: 1.15;
+  color: rgba(238, 244, 255, 0.78);
 }
 
 .history-pinned-row {

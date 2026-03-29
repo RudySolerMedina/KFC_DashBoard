@@ -6,7 +6,9 @@ const RANGE_OPTIONS = [
   { value: '6h', label: '6 часов' },
   { value: '24h', label: '24 часа' },
   { value: '7d', label: '7 дней' },
-  { value: '30d', label: '30 дней' }
+  { value: '30d', label: '30 дней' },
+  { value: '90d', label: '90 дней' },
+  { value: '1y', label: '1 год' }
 ]
 
 const AREA_OPTIONS = [
@@ -33,31 +35,31 @@ const AREA_OPTIONS = [
   },
   { id: 'f100_left', label: 'F100 Левая (Закрытые жаровни:1.1)', photo: '/areas/f100_left.png', topics: [] },
   { id: 'f100_right', label: 'F100 Правая (Закрытые жаровни:1.2)', photo: '/areas/f100_right.png', topics: [] },
-  { id: 'fastron_1_left', label: 'FASTRON_1 Левая (Открытые жаровни:2.1)', topics: [] },
-  { id: 'fastron_2_mid', label: 'FASTRON_2 Средная (Открытые жаровни:2.2)', topics: [] },
-  { id: 'fastron_3_right', label: 'FASTRON_3 Правая (Открытые жаровни:2.3)', topics: [] },
-  { id: 'eee_142_right', label: 'Жаровня EEE 142 правая (Фритюрница на кухне картофеля фри:3.2)', topics: [] },
-  { id: 'eee_142_left', label: 'Жаровня EEE 142 левая (Фритюрница на кухне картофеля фри:3.1)', topics: [] },
+  { id: 'fastron_1_left', label: 'FASTRON_1 Левая (Открытые жаровни:2.1)', photo: '/areas/fastron_1_left.png', topics: [] },
+  { id: 'fastron_2_mid', label: 'FASTRON_2 Средная (Открытые жаровни:2.2)', photo: '/areas/fastron_2_mid.png', topics: [] },
+  { id: 'fastron_3_right', label: 'FASTRON_3 Правая (Открытые жаровни:2.3)', photo: '/areas/fastron_3_right.png', topics: [] },
+  { id: 'eee_142_right', label: 'Жаровня EEE 142 правая (Фритюрница на кухне картофеля фри:3.2)', photo: '/areas/eee_142_right.png', topics: [] },
+  { id: 'eee_142_left', label: 'Жаровня EEE 142 левая (Фритюрница на кухне картофеля фри:3.1)', photo: '/areas/eee_142_left.png', topics: [] },
   { id: 'heat_cab', label: 'ТЕПЛОВОЙ ШКАФ', topics: [] },
-  { id: 'follett_1050', label: 'Шкаф тепловой FOLLETT 1050BK (Тепловая витрина)', topics: [] },
-  { id: 'toaster_vertical', label: 'ТОСТЕР ВЕРТИКАЛЬНЫЙ', topics: [] },
-  { id: 'toaster_horizontal', label: 'ТОСТЕР ГОРИЗОНТАЛЬНЫЙ', topics: [] },
-  { id: 'heat_903_12', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.2)', topics: [] },
-  { id: 'heat_903_11', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.1)', topics: [] },
-  { id: 'heat_903_13', label: 'Тепловой шкаф 903 (Тепловой шкаф на кухне 1.3)', topics: [] },
-  { id: 'silain', label: 'Силайн (очень малый тепловой шкаф)', topics: [] },
+  { id: 'follett_1050', label: 'Шкаф тепловой FOLLETT 1050BK (Тепловая витрина)', photo: '/areas/follett_1050.png', topics: [] },
+  { id: 'toaster_vertical', label: 'ТОСТЕР ВЕРТИКАЛЬНЫЙ', photo: '/areas/toaster_vertical.png', topics: [] },
+  { id: 'toaster_horizontal', label: 'ТОСТЕР ГОРИЗОНТАЛЬНЫЙ', photo: '/areas/toaster_horizontal.png', topics: [] },
+  { id: 'heat_903_12', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.2)', photo: '/areas/heat_903_12.png', topics: [] },
+  { id: 'heat_903_11', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.1)', photo: '/areas/heat_903_11.png', topics: [] },
+  { id: 'heat_903_13', label: 'Тепловой шкаф 903 (Тепловой шкаф на кухне 1.3)', photo: '/areas/heat_903_13.png', topics: [] },
+  { id: 'silain', label: 'Силайн (очень малый тепловой шкаф)', photo: '/areas/silain.png', topics: [] },
   { id: 'freezer_1', label: 'Морозильная камера 1', topics: [] },
-  { id: 'freezer_2', label: 'Морозильная камера 2', topics: [] },
+  { id: 'freezer_2', label: 'Морозильная камера 2', photo: '/areas/freezer_2.png', topics: [] },
   { id: 'cold_veg', label: 'Холодильная камера (овощн.)', topics: [] },
   { id: 'cold_defrost_chicken', label: 'Холодильная камера (дефрост) для курицы', topics: [] },
-  { id: 'coffee_1', label: 'Кофемашина 1', topics: [] },
-  { id: 'coffee_2', label: 'Кофемашина 2', topics: [] },
+  { id: 'coffee_1', label: 'Кофемашина 1', photo: '/areas/coffee_1.png', topics: [] },
+  { id: 'coffee_2', label: 'Кофемашина 2', photo: '/areas/coffee_2.png', topics: [] },
   { id: 'salad_fridge', label: 'Холодильник саладет', topics: [] },
   { id: 'boiler_1', label: 'Бойлер 1', topics: [] },
   { id: 'boiler_2', label: 'Бойлер 2', topics: [] },
-  { id: 'cocktail', label: 'Коктельница', topics: [] },
-  { id: 'heat_curtain', label: 'Тепловая завесы', topics: [] },
-  { id: 'ac', label: 'Кондиционеры', topics: [] },
+  { id: 'cocktail', label: 'Коктельница', photo: '/areas/cocktail.png', topics: [] },
+  { id: 'heat_curtain', label: 'Тепловая завесы', photo: '/areas/heat_curtain.png', topics: [] },
+  { id: 'ac', label: 'Кондиционеры', photo: '/areas/ac.png', topics: [] },
   { id: 'heaters', label: 'Обогреватели', topics: [] },
   { id: 'outdoor_light', label: 'Уличное освещение', topics: [] },
   { id: 'rest_light_group', label: 'Группа Освещение в ресторане', topics: [] },
@@ -176,7 +178,10 @@ function formatTimestamp(timestamp) {
 
 function formatXLabel(timestamp, windowSize) {
   const d = new Date(timestamp)
-  if (windowSize === '30d') {
+  if (windowSize === '1y') {
+    return `${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`
+  }
+  if (windowSize === '30d' || windowSize === '90d') {
     return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`
   }
   if (windowSize === '7d') {
@@ -195,6 +200,8 @@ function computeXTicks(minTime, maxTime, windowSize, count = 5) {
 }
 
 function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) {
+  const [hoveredIndex, setHoveredIndex] = useState(null)
+
   if (!points.length) {
     return <div className="history-empty">Нет данных за выбранный период.</div>
   }
@@ -226,6 +233,13 @@ function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) 
     chartPoints.map(([x, y]) => `L ${x.toFixed(1)},${y.toFixed(1)}`).join(' ') +
     ` L ${last[0].toFixed(1)},${height - padding} Z`
   const xTicks = computeXTicks(minTime, maxTime, windowSize)
+  const hoveredPoint = hoveredIndex !== null
+    ? {
+        ...points[hoveredIndex],
+        x: chartPoints[hoveredIndex][0],
+        y: chartPoints[hoveredIndex][1],
+      }
+    : null
 
   return (
     <div className="history-chart-shell">
@@ -235,7 +249,12 @@ function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) 
         <span>{formatMetricValue(min)}</span>
       </div>
       <div className="history-chart-col">
-        <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+        <svg
+          className="history-chart"
+          viewBox={`0 0 ${width} ${height}`}
+          preserveAspectRatio="none"
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
           <defs>
             <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={accentColor} stopOpacity="0.30" />
@@ -244,8 +263,51 @@ function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) 
           </defs>
           <path d={areaPath} fill={`url(#${chartId})`} />
           <polyline points={polyline} fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+          {chartPoints.map(([x, y], index) => (
+            <circle
+              key={`${chartId}-hit-${index}`}
+              cx={x.toFixed(1)}
+              cy={y.toFixed(1)}
+              r="8"
+              fill="transparent"
+              onMouseEnter={() => setHoveredIndex(index)}
+            />
+          ))}
+          {hoveredPoint && (
+            <g>
+              <line
+                x1={hoveredPoint.x.toFixed(1)}
+                y1={padding}
+                x2={hoveredPoint.x.toFixed(1)}
+                y2={(height - padding).toFixed(1)}
+                stroke="rgba(255,255,255,0.35)"
+                strokeWidth="1"
+                strokeDasharray="5 4"
+              />
+              <circle
+                cx={hoveredPoint.x.toFixed(1)}
+                cy={hoveredPoint.y.toFixed(1)}
+                r="5.5"
+                fill={accentColor}
+                stroke="rgba(255,255,255,0.9)"
+                strokeWidth="1.5"
+              />
+            </g>
+          )}
           <circle cx={last[0].toFixed(1)} cy={last[1].toFixed(1)} r="5" fill={accentColor} />
         </svg>
+        {hoveredPoint && (
+          <div
+            className="history-chart-tooltip"
+            style={{
+              left: `${(hoveredPoint.x / width) * 100}%`,
+              top: `${(hoveredPoint.y / height) * 100}%`,
+            }}
+          >
+            <strong>{formatMetricValue(hoveredPoint.value)}</strong>
+            <span>{formatTimestamp(hoveredPoint.timestamp)}</span>
+          </div>
+        )}
         <div className="history-xaxis">
           {xTicks.map(tick => <span key={tick.time}>{tick.label}</span>)}
         </div>
@@ -255,6 +317,8 @@ function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) 
 }
 
 function MultiLineChart({ lines, windowSize }) {
+  const [hoveredPoint, setHoveredPoint] = useState(null)
+
   const allPoints = lines.flatMap(line => line.points)
   if (!allPoints.length) {
     return <div className="history-empty">Нет данных за выбранный период.</div>
@@ -293,7 +357,12 @@ function MultiLineChart({ lines, windowSize }) {
         <span>{formatMetricValue(minVal)}</span>
       </div>
       <div className="history-chart-col">
-        <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+        <svg
+          className="history-chart"
+          viewBox={`0 0 ${width} ${height}`}
+          preserveAspectRatio="none"
+          onMouseLeave={() => setHoveredPoint(null)}
+        >
           {lines.map((line, lineIndex) => {
             if (!line.points.length) return null
             const chartPoints = line.points.map(mapXY)
@@ -318,10 +387,65 @@ function MultiLineChart({ lines, windowSize }) {
                   r="4.5"
                   fill={line.color}
                 />
+                {chartPoints.map(([x, y], pointIndex) => {
+                  const point = line.points[pointIndex]
+                  return (
+                    <circle
+                      key={`hit-${lineIndex}-${pointIndex}`}
+                      cx={x.toFixed(1)}
+                      cy={y.toFixed(1)}
+                      r="8"
+                      fill="transparent"
+                      onMouseEnter={() => {
+                        setHoveredPoint({
+                          x,
+                          y,
+                          value: point.value,
+                          timestamp: point.timestamp,
+                          color: line.color,
+                          label: line.label,
+                        })
+                      }}
+                    />
+                  )
+                })}
               </g>
             )
           })}
+          {hoveredPoint && (
+            <g>
+              <line
+                x1={hoveredPoint.x.toFixed(1)}
+                y1={padding}
+                x2={hoveredPoint.x.toFixed(1)}
+                y2={(height - padding).toFixed(1)}
+                stroke="rgba(255,255,255,0.35)"
+                strokeWidth="1"
+                strokeDasharray="5 4"
+              />
+              <circle
+                cx={hoveredPoint.x.toFixed(1)}
+                cy={hoveredPoint.y.toFixed(1)}
+                r="5.5"
+                fill={hoveredPoint.color}
+                stroke="rgba(255,255,255,0.9)"
+                strokeWidth="1.5"
+              />
+            </g>
+          )}
         </svg>
+        {hoveredPoint && (
+          <div
+            className="history-chart-tooltip"
+            style={{
+              left: `${(hoveredPoint.x / width) * 100}%`,
+              top: `${(hoveredPoint.y / height) * 100}%`,
+            }}
+          >
+            <strong>{hoveredPoint.label}: {formatMetricValue(hoveredPoint.value)}</strong>
+            <span>{formatTimestamp(hoveredPoint.timestamp)}</span>
+          </div>
+        )}
         <div className="history-xaxis">
           {xTicks.map(tick => <span key={tick.time}>{tick.label}</span>)}
         </div>
@@ -535,7 +659,7 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
         setSeries(nextSeries)
       })
       .catch(fetchError => {
-        if (fetchError.name !== 'AbortError') {
+        if (fetchError.name !== 'AbortError' && !controller.signal.aborted) {
           setError(fetchError.message)
         }
       })

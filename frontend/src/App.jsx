@@ -21,8 +21,12 @@ function App() {
   const [broker, setBroker] = useState('')
   const [activeView, setActiveView] = useState('realtime')
   const wsRef = useRef(null)
+  const reconnectTimerRef = useRef(null)
+  const shouldReconnectRef = useRef(true)
 
   useEffect(() => {
+    shouldReconnectRef.current = true
+
     fetch(`${API_BASE_URL}/api/metrics`)
       .then(r => r.json())
       .then(data => {
@@ -31,49 +35,71 @@ function App() {
       })
       .catch(e => console.error('API error:', e))
 
-    const ws = new WebSocket(`${WS_BASE_URL}/ws`)
+    const connectWebSocket = () => {
+      if (!shouldReconnectRef.current) {
+        return
+      }
 
-    ws.onopen = () => {
-      setConnected(true)
-    }
+      const ws = new WebSocket(`${WS_BASE_URL}/ws`)
+      wsRef.current = ws
 
-    ws.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data)
+      ws.onopen = () => {
+        setConnected(true)
+      }
 
-        if (payload.type === 'bootstrap') {
-          setBroker(payload.broker)
-          setMetrics(payload.metrics)
-          setValues(payload.values)
-          // Seed histories with the initial bootstrap values
-          const init = {}
-          Object.entries(payload.values).forEach(([topic, v]) => {
-            const num = typeof v === 'object' ? v.value : v
-            if (typeof num === 'number' && !isNaN(num)) init[topic] = [num]
-          })
-          setHistories(init)
+      ws.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data)
+
+          if (payload.type === 'bootstrap') {
+            setBroker(payload.broker)
+            setMetrics(payload.metrics)
+            setValues(payload.values)
+            // Seed histories with the initial bootstrap values
+            const init = {}
+            Object.entries(payload.values).forEach(([topic, v]) => {
+              const num = typeof v === 'object' ? v.value : v
+              if (typeof num === 'number' && !isNaN(num)) init[topic] = [num]
+            })
+            setHistories(init)
+          }
+
+          if (payload.type === 'metric') {
+            const num = parseFloat(payload.value)
+            setValues(prev => ({ ...prev, [payload.topic]: { value: num, ts: payload.ts } }))
+            setHistories(prev => {
+              const arr = prev[payload.topic] || []
+              return { ...prev, [payload.topic]: [...arr, num].slice(-MAX_HISTORY) }
+            })
+          }
+        } catch (error) {
+          console.error('WebSocket parse error:', error)
         }
+      }
 
-        if (payload.type === 'metric') {
-          const num = parseFloat(payload.value)
-          setValues(prev => ({ ...prev, [payload.topic]: { value: num, ts: payload.ts } }))
-          setHistories(prev => {
-            const arr = prev[payload.topic] || []
-            return { ...prev, [payload.topic]: [...arr, num].slice(-MAX_HISTORY) }
-          })
+      ws.onerror = () => {
+        setConnected(false)
+      }
+
+      ws.onclose = () => {
+        setConnected(false)
+        if (shouldReconnectRef.current) {
+          reconnectTimerRef.current = setTimeout(connectWebSocket, 2000)
         }
-      } catch (error) {
-        console.error('WebSocket parse error:', error)
       }
     }
 
-    ws.onerror = () => { setConnected(false) }
-    ws.onclose = () => { setConnected(false) }
-
-    wsRef.current = ws
+    connectWebSocket()
 
     return () => {
-      if (wsRef.current) wsRef.current.close()
+      shouldReconnectRef.current = false
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current)
+        reconnectTimerRef.current = null
+      }
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
     }
   }, [])
 
