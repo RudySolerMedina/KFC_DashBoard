@@ -1,86 +1,98 @@
-# 🔌 Dashboard KFC - Guía Completa Paso a Paso
+# Dashboard KFC - Deploy Limpio (Ubuntu 20.04)
 
-**Monitor en tiempo real de consumo eléctrico trifásico + histórico de KFC Nevinnomyssk**
+Guia final basada en errores reales vistos en produccion.
 
-Frontend React + Backend FastAPI + MQTT + PostgreSQL
+Stack:
+- Frontend: React + Vite (requiere Node 22)
+- Backend: FastAPI + Uvicorn (Python 3.9+)
+- Runtime: PM2
+- Datos: MQTT + PostgreSQL (DB en red privada via VPN)
 
----
+## 1) Versiones exactas recomendadas
 
-## 📋 PASO 1 - Verificar que estés en el directorio correcto
+- Ubuntu: 20.04
+- Node.js: 22.22.0
+- npm: 10.x (la que instala Node 22)
+- PM2: 6.0.14
+- Python: 3.9.5
+- pip: ultima disponible en el venv
 
-```bash
-pwd
-# Debería mostrar: /root/KFC_DashBoard
-```
+## 2) Limpiar TODO (frontend/backend/procesos)
 
----
-
-## 📋 PASO 2 - Actualizar el sistema
-
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
-
----
-
-## 📋 PASO 3 - Instalar Node.js (para frontend)
+Ejecuta en el servidor:
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
-node --version
-npm --version
+pm2 delete all || true
+pm2 kill || true
+
+rm -rf /root/KFC_DashBoard
+
+rm -rf /root/.pm2/logs/* || true
+
+apt remove -y nodejs || true
+apt autoremove -y
+apt clean
 ```
 
----
-
-## 📋 PASO 4 - Instalar Python y venv (para backend)
+## 3) Instalar dependencias base
 
 ```bash
-sudo apt install -y python3 python3-venv python3-pip
-python3 --version
+apt update
+apt upgrade -y
+apt install -y git curl build-essential ca-certificates software-properties-common netcat-openbsd
 ```
 
----
-
-## 📋 PASO 5 - Instalar pm2 (gestor de procesos)
+## 4) Instalar Node.js 22 + PM2
 
 ```bash
-sudo npm install -g pm2
-pm2 --version
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt install -y nodejs
+
+node -v
+npm -v
+
+npm install -g pm2@6
+pm2 -v
 ```
 
----
-
-## 📋 PASO 6 - Configurar Backend (.env)
-
-Abre el archivo de configuración:
+## 5) Instalar Python 3.9 y crear backend venv
 
 ```bash
-nano /root/KFC_DashBoard/backend/.env
+apt install -y python3.9 python3.9-venv python3-pip
+python3.9 --version
 ```
 
-**Cambia SOLO estas 4 líneas con tus valores:**
+## 6) Clonar proyecto limpio
 
-```ini
+```bash
+cd /root
+git clone https://github.com/RudySolerMedina/KFC_DashBoard.git
+cd /root/KFC_DashBoard
+```
+
+## 7) Configurar backend/.env
+
+```bash
+cat > /root/KFC_DashBoard/backend/.env << 'EOF'
 MQTT_BROKER=85.198.65.213
 MQTT_PORT=1883
-DB_HOST=192.168.1.100
+MQTT_CLIENT_ID=kfc_dashboard_backend
+API_HOST=0.0.0.0
+API_PORT=8080
+DB_HOST=10.250.250.43
 DB_PORT=5432
 DB_DATABASE=dbo
-DB_USER=postgres
-DB_PASSWORD=mi_contraseña_aqui
+DB_USER=soler
+DB_PASSWORD=NzoKFXd1--sShVbc
 DB_SCHEMA=smart_restaurants
 DB_TABLE=novonimisk_data
-API_PORT=8080
+FLUSH_INTERVAL_SECONDS=60
+DB_RECONNECT_INTERVAL_SECONDS=10
+CORS_ORIGINS=http://155.212.221.139:3000,http://localhost:3000
+EOF
 ```
 
-**Para guardar:** `CTRL + X` → `Y` → `ENTER`
-
----
-
-## 📋 PASO 7 - Instalar dependencias Frontend
+## 8) Instalar frontend y build
 
 ```bash
 cd /root/KFC_DashBoard/frontend
@@ -88,175 +100,90 @@ npm install
 npm run build
 ```
 
----
-
-## 📋 PASO 8 - Instalar dependencias Backend
+## 9) Instalar backend (venv Python 3.9)
 
 ```bash
 cd /root/KFC_DashBoard/backend
-python3 -m venv venv
+python3.9 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt
+
+# Version que funciono en Ubuntu 20.04 con Python 3.9
+pip install fastapi==0.115.12 "uvicorn[standard]==0.33.0" paho-mqtt==2.1.0 psycopg2-binary==2.9.10 python-dotenv==1.0.1
 ```
 
----
+## 10) Levantar servicios con PM2 (forma estable)
 
-## 📋 PASO 9 - Crear carpeta de logs
+### Frontend
 
 ```bash
-mkdir -p /root/KFC_DashBoard/logs
+pm2 start "npm run preview -- --host 0.0.0.0 --port 3000" --name kfc-frontend --cwd /root/KFC_DashBoard/frontend
 ```
 
----
+### Backend
 
-## 📋 PASO 10 - Iniciar todo automáticamente con pm2
+No usar `pm2 start .../uvicorn` directo porque PM2 puede interpretarlo como JS.
 
 ```bash
-cd /root/KFC_DashBoard
-pm2 start ecosystem.config.js
-pm2 status
+cat > /root/KFC_DashBoard/start_backend.sh << 'EOF'
+#!/bin/bash
+cd /root/KFC_DashBoard/backend
+source venv/bin/activate
+exec python main.py
+EOF
+
+chmod +x /root/KFC_DashBoard/start_backend.sh
+pm2 start /root/KFC_DashBoard/start_backend.sh --name kfc-backend
 ```
 
-Debería mostrar 2 procesos corriendo: `kfc-backend` y `kfc-frontend`
+## 11) Verificaciones
 
----
-
-## 📋 PASO 11 - Ver logs en tiempo real
-
-```bash
-pm2 logs
-```
-
-Espera a ver:
-- ✅ "MQTT connected"  
-- ✅ "Database connected"
-- ✅ "Loaded X latest values"
-
-Presiona `CTRL + C` para salir de los logs.
-
----
-
-## 📋 PASO 12 - Acceder a tu Dashboard
-
-Abre en el navegador:
-
-```
-http://tu_ip_del_servidor:3000
-```
-
-Ejemplo:
-```
-http://192.168.1.50:3000
-```
-
----
-
-## 📊 COMANDOS ÚTILES DESPUÉS
-
-### Ver estado
 ```bash
 pm2 status
+ss -ltnp | grep 3000 || true
+ss -ltnp | grep 8080 || true
+curl http://127.0.0.1:8080/api/metrics
 ```
 
-### Reiniciar todo
-```bash
-pm2 restart all
-```
+URLs:
+- Frontend: http://SERVER_IP:3000
+- Backend: http://SERVER_IP:8080/api/metrics
 
-### Ver logs
-```bash
-pm2 logs
-```
+## 12) Auto inicio al reiniciar servidor
 
-### Detener todo
-```bash
-pm2 stop all
-```
-
-### Eliminar de pm2
-```bash
-pm2 delete all
-```
-
-### Guardar para que inicie en reboot
 ```bash
 pm2 save
-sudo pm2 startup
+pm2 startup
 ```
 
----
+Ejecuta el comando que te muestre `pm2 startup` (normalmente incluye `sudo env PATH=... pm2 startup ...`).
 
-## 🔧 Si algo falla
+## 13) VPN y DB privada (10.250.250.43)
 
-### Backend no conecta a MQTT
+Si el backend arranca pero no conecta DB:
+
 ```bash
-pm2 logs kfc-backend
+ip addr show tun0
+ip -4 route
+ping -I tun0 -c 3 10.8.0.1
+ping -I tun0 -c 3 10.250.250.43
+nc -zvw3 10.250.250.43 5432
 ```
-Verifica que `MQTT_BROKER` en `backend/.env` sea correcto.
 
-### Backend no conecta a PostgreSQL  
-```bash
-pm2 logs kfc-backend
-```
-Verifica `DB_HOST`, `DB_USER`, `DB_PASSWORD` en `backend/.env`.
+Interpretacion:
+- `ping 10.8.0.1` OK y `ping 10.250.250.43` FAIL: problema de ruteo/ACL en VPN remota
+- `ping` OK pero `5432 timeout`: firewall/pg_hba/listen_addresses del servidor PostgreSQL
 
-### Frontend no carga
-```bash
-pm2 logs kfc-frontend
-```
-Verifica que el backend esté corriendo: `pm2 status`
+## 14) Comandos de soporte
 
-### Puerto 3000 en uso
 ```bash
-lsof -i :3000
-sudo kill -9 <PID>
+pm2 logs kfc-backend --lines 120
+pm2 logs kfc-frontend --lines 120
+pm2 restart kfc-backend
 pm2 restart kfc-frontend
+pm2 delete kfc-backend
+pm2 delete kfc-frontend
 ```
-
----
-
-## ✅ Checklist Final
-
-- [ ] Estás en `/root/KFC_DashBoard`
-- [ ] Node.js 18+ instalado (`node --version`)
-- [ ] Python 3.10+ instalado (`python3 --version`)
-- [ ] `backend/.env` editado con tus datos
-- [ ] `npm install` en frontend completó
-- [ ] Entorno virtual Python creado (`backend/venv/`)
-- [ ] `pm2 start ecosystem.config.js` corrió sin errores
-- [ ] `pm2 status` muestra 2 procesos running
-- [ ] Puedes abrir `http://tu_ip:3000` en navegador
-
----
-
-## 🚀 Resumen Ultra Rápido
-
-Si **ya clonaste** y solo quieres iniciar:
-
-```bash
-# Todos estos comandos en orden, copia-pega línea por línea:
-
-cd /root/KFC_DashBoard
-sudo apt update && sudo apt install -y nodejs python3 python3-venv
-sudo npm install -g pm2
-nano backend/.env                    # Edita: MQTT_BROKER, DB_HOST, usuario, contraseña
-cd frontend && npm install && npm run build && cd ..
-cd backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && cd ..
-mkdir -p logs
-pm2 start ecosystem.config.js
-pm2 status
-```
-
-**Listo. Accede a `http://tu_ip:3000`** ✅
-
-## 🔧 Hardware Mínimo
-
-- **CPU**: 1 core (Ubuntu 20.04+)
-- **RAM**: 512 MB
-- **Node.js**: 18+
-- **Python**: 3.10+
-- **PostgreSQL**: 12+ (remoto OK)
 
 ---
 
