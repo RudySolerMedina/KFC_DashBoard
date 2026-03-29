@@ -521,7 +521,7 @@ async def history(
     if not DATABASE.is_connected:
         raise HTTPException(status_code=503, detail='History unavailable: database disconnected')
 
-    end_at = datetime.now()
+    end_at = datetime.utcnow()
     start_at = end_at - parse_window(window)
     try:
         points = await asyncio.to_thread(DATABASE.fetch_history, topic, start_at, end_at, limit)

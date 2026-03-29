@@ -598,6 +598,34 @@ function GroupedTopicCard({ group, seriesByTopic, loading, windowSize, phaseColo
   )
 }
 
+function downloadCSV(series, selectedArea, windowSize) {
+  if (!series.length) return
+  const rows = [['Timestamp', 'Metric', 'Topic', 'Value', 'Unit']]
+  for (const item of series) {
+    for (const point of [...item.points].reverse()) {
+      rows.push([
+        point.timestamp,
+        item.label,
+        item.topic,
+        point.value,
+        item.unit,
+      ])
+    }
+  }
+  const csv = rows
+    .map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${selectedArea.id}_${windowSize}_${new Date().toISOString().slice(0, 10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 export function HistoricalView({ apiBaseUrl, metrics }) {
   const [selectedAreaId, setSelectedAreaId] = useState(AREA_OPTIONS[0].id)
   const [windowSize, setWindowSize] = useState('24h')
@@ -713,13 +741,24 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
           <div className="history-controls">
             <label className="history-control">
               <span>Метрика</span>
-              <select value={selectedAreaId} onChange={event => setSelectedAreaId(event.target.value)}>
-                {AREA_OPTIONS.map(area => (
-                  <option key={area.id} value={area.id}>
-                    {area.label}
-                  </option>
-                ))}
-              </select>
+              <div className="history-metric-row">
+                <select value={selectedAreaId} onChange={event => setSelectedAreaId(event.target.value)}>
+                  {AREA_OPTIONS.map(area => (
+                    <option key={area.id} value={area.id}>
+                      {area.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="history-download-btn"
+                  title="Скачать данные в CSV"
+                  disabled={loading || !series.some(s => s.points.length > 0)}
+                  onClick={() => downloadCSV(series, selectedArea, windowSize)}
+                >
+                  ↓ CSV
+                </button>
+              </div>
             </label>
             <div className="history-ranges">
               {RANGE_OPTIONS.map(option => (

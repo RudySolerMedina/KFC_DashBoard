@@ -94,6 +94,17 @@
   font-size: 0.88rem;
 }
 
+.history-metric-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.history-metric-row select {
+  flex: 1;
+  min-width: 0;
+}
+
 .history-control select {
   width: 100%;
   padding: 0.8rem 1rem;
@@ -101,6 +112,32 @@
   border: 1px solid rgba(68, 246, 255, 0.28);
   background: rgba(5, 12, 24, 0.84);
   color: #eef4ff;
+}
+
+.history-download-btn {
+  flex-shrink: 0;
+  padding: 0.78rem 1.1rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(68, 246, 255, 0.38);
+  background: rgba(68, 246, 255, 0.09);
+  color: #44f6ff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+
+.history-download-btn:hover:not(:disabled) {
+  background: #44f6ff;
+  color: #06101c;
+  border-color: #44f6ff;
+}
+
+.history-download-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .history-ranges {
