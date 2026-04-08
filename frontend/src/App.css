@@ -1,15 +1,15 @@
 :root {
   --bg-deep: #0a0f1a;
-  --bg-mid: #131e34;
-  --bg-accent: #1a2d4e;
+  --bg-mid: #231820;
+  --bg-accent: #1a3b30;
   --glass-bg: rgba(13, 20, 34, 0.5);
   --electric-border-color: #dd8448;
   --electric-light-color: #f2ae79;
   --electric-gradient-color: rgba(221, 132, 72, 0.35);
   --text-main: #eef4ff;
   --text-dim: #9fb2d1;
-  --neon-cyan: #44f6ff;
-  --neon-blue: #4ea0ff;
+  --neon-cyan: #ff7a59;
+  --neon-blue: #ffd166;
   --neon-green: #2eff9a;
   --neon-red: #ff5a78;
 }
@@ -46,7 +46,7 @@ body {
 
 .header {
   padding: 2rem;
-  border-bottom: 1px solid rgba(68, 246, 255, 0.3);
+  border-bottom: 1px solid rgba(255, 122, 89, 0.35);
   background: rgba(10, 15, 26, 0.6);
   backdrop-filter: blur(10px);
 }
@@ -65,7 +65,7 @@ body {
   font-size: 2.4rem;
   font-weight: 700;
   color: var(--neon-cyan);
-  text-shadow: 0 0 20px rgba(68, 246, 255, 0.6);
+  text-shadow: 0 0 20px rgba(255, 122, 89, 0.6);
 }
 
 .subtitle {

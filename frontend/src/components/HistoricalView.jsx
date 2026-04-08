@@ -11,6 +11,36 @@ const RANGE_OPTIONS = [
   { value: '1y', label: '1 год' }
 ]
 
+function threePhaseTopics(device, channel, frequencyDevice = device) {
+  const base = `Nevinnomisk/devices/${device}/controls`
+  const frequencyBase = `Nevinnomisk/devices/${frequencyDevice}/controls`
+  return [
+    `${base}/Urms L1`,
+    `${base}/Urms L2`,
+    `${base}/Urms L3`,
+    `${base}/Ch ${channel} Irms L1`,
+    `${base}/Ch ${channel} Irms L2`,
+    `${base}/Ch ${channel} Irms L3`,
+    `${base}/Ch ${channel} P L1`,
+    `${base}/Ch ${channel} P L2`,
+    `${base}/Ch ${channel} P L3`,
+    `${base}/Ch ${channel} Total P`,
+    `${base}/Ch ${channel} Total AP energy`,
+    `${frequencyBase}/Frequency`,
+  ]
+}
+
+function singlePhaseTopics(device, channel, phase) {
+  const base = `Nevinnomisk/devices/${device}/controls`
+  return [
+    `${base}/Urms ${phase}`,
+    `${base}/Ch ${channel} Irms ${phase}`,
+    `${base}/Ch ${channel} P ${phase}`,
+    `${base}/Ch ${channel} AP energy ${phase}`,
+    `${base}/Frequency`,
+  ]
+}
+
 const AREA_OPTIONS = [
   {
     id: 'total_kfc',
@@ -33,37 +63,71 @@ const AREA_OPTIONS = [
       'Nevinnomisk/devices/energomera303_00000201/controls/Total A energy'
     ]
   },
-  { id: 'f100_left', label: 'F100 Левая (Закрытые жаровни:1.1)', photo: '/areas/f100_left.png', topics: [] },
-  { id: 'f100_right', label: 'F100 Правая (Закрытые жаровни:1.2)', photo: '/areas/f100_right.png', topics: [] },
-  { id: 'fastron_1_left', label: 'FASTRON_1 Левая (Открытые жаровни:2.1)', photo: '/areas/fastron_1_left.png', topics: [] },
-  { id: 'fastron_2_mid', label: 'FASTRON_2 Средная (Открытые жаровни:2.2)', photo: '/areas/fastron_2_mid.png', topics: [] },
-  { id: 'fastron_3_right', label: 'FASTRON_3 Правая (Открытые жаровни:2.3)', photo: '/areas/fastron_3_right.png', topics: [] },
-  { id: 'eee_142_right', label: 'Жаровня EEE 142 правая (Фритюрница на кухне картофеля фри:3.2)', photo: '/areas/eee_142_right.png', topics: [] },
-  { id: 'eee_142_left', label: 'Жаровня EEE 142 левая (Фритюрница на кухне картофеля фри:3.1)', photo: '/areas/eee_142_left.png', topics: [] },
-  { id: 'heat_cab', label: 'ТЕПЛОВОЙ ШКАФ', topics: [] },
-  { id: 'follett_1050', label: 'Шкаф тепловой FOLLETT 1050BK (Тепловая витрина)', photo: '/areas/follett_1050.png', topics: [] },
-  { id: 'toaster_vertical', label: 'ТОСТЕР ВЕРТИКАЛЬНЫЙ', photo: '/areas/toaster_vertical.png', topics: [] },
-  { id: 'toaster_horizontal', label: 'ТОСТЕР ГОРИЗОНТАЛЬНЫЙ', photo: '/areas/toaster_horizontal.png', topics: [] },
-  { id: 'heat_903_12', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.2)', photo: '/areas/heat_903_12.png', topics: [] },
-  { id: 'heat_903_11', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.1)', photo: '/areas/heat_903_11.png', topics: [] },
+  { id: 'f100_left', label: 'F100 Левая (Закрытые жаровни:1.1)', photo: '/areas/f100_left.png', topics: threePhaseTopics('wb-map12e_58', 1) },
+  { id: 'f100_right', label: 'F100 Правая (Закрытые жаровни:1.2)', photo: '/areas/f100_right.png', topics: threePhaseTopics('wb-map12e_58', 2) },
+  { id: 'fastron_1_left', label: 'FASTRON_1 Левая (Открытые жаровни:2.1)', photo: '/areas/fastron_1_left.png', topics: threePhaseTopics('wb-map12e_58', 3) },
+  { id: 'fastron_2_mid', label: 'FASTRON_2 Средная (Открытые жаровни:2.2)', photo: '/areas/fastron_2_mid.png', topics: threePhaseTopics('wb-map12e_58', 4) },
+  { id: 'fastron_3_right', label: 'FASTRON_3 Правая (Открытые жаровни:2.3)', photo: '/areas/fastron_3_right.png', topics: threePhaseTopics('wb-map12e_34', 1) },
+  { id: 'eee_142_right', label: 'Жаровня EEE 142 правая (Фритюрница на кухне картофеля фри:3.2)', photo: '/areas/eee_142_right.png', topics: threePhaseTopics('wb-map12e_34', 3, 'wb-map12e_58') },
+  { id: 'eee_142_left', label: 'Жаровня EEE 142 левая (Фритюрница на кухне картофеля фри:3.1)', photo: '/areas/eee_142_left.png', topics: threePhaseTopics('wb-map12e_34', 2) },
+  { id: 'heat_cab', label: 'ТЕПЛОВОЙ ШКАФ', topics: singlePhaseTopics('wb-map12e_243', 3, 'L1') },
+  { id: 'follett_1050', label: 'Шкаф тепловой FOLLETT 1050BK (Тепловая витрина)', photo: '/areas/follett_1050.png', topics: singlePhaseTopics('wb-map12e_243', 3, 'L2') },
+  { id: 'toaster_vertical', label: 'ТОСТЕР ВЕРТИКАЛЬНЫЙ', photo: '/areas/toaster_vertical.png', topics: singlePhaseTopics('wb-map12e_243', 3, 'L3') },
+  { id: 'toaster_horizontal', label: 'ТОСТЕР ГОРИЗОНТАЛЬНЫЙ', photo: '/areas/toaster_horizontal.png', topics: singlePhaseTopics('wb-map12e_243', 4, 'L1') },
+  { id: 'heat_903_12', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.2)', photo: '/areas/heat_903_12.png', topics: singlePhaseTopics('wb-map12e_243', 4, 'L2') },
+  { id: 'heat_903_11', label: 'Тепловой шкаф 903 (Тепловые шкафы на панировке:1.1)', photo: '/areas/heat_903_11.png', topics: singlePhaseTopics('wb-map12e_243', 4, 'L2') },
   { id: 'heat_903_13', label: 'Тепловой шкаф 903 (Тепловой шкаф на кухне 1.3)', photo: '/areas/heat_903_13.png', topics: [] },
   { id: 'silain', label: 'Силайн (очень малый тепловой шкаф)', photo: '/areas/silain.png', topics: [] },
-  { id: 'freezer_1', label: 'Морозильная камера 1', topics: [] },
-  { id: 'freezer_2', label: 'Морозильная камера 2', photo: '/areas/freezer_2.png', topics: [] },
-  { id: 'cold_veg', label: 'Холодильная камера (овощн.)', topics: [] },
-  { id: 'cold_defrost_chicken', label: 'Холодильная камера (дефрост) для курицы', topics: [] },
-  { id: 'coffee_1', label: 'Кофемашина 1', photo: '/areas/coffee_1.png', topics: [] },
-  { id: 'coffee_2', label: 'Кофемашина 2', photo: '/areas/coffee_2.png', topics: [] },
-  { id: 'salad_fridge', label: 'Холодильник саладет', topics: [] },
-  { id: 'boiler_1', label: 'Бойлер 1', topics: [] },
-  { id: 'boiler_2', label: 'Бойлер 2', topics: [] },
-  { id: 'cocktail', label: 'Коктельница', photo: '/areas/cocktail.png', topics: [] },
-  { id: 'heat_curtain', label: 'Тепловая завесы', photo: '/areas/heat_curtain.png', topics: [] },
-  { id: 'ac', label: 'Кондиционеры', photo: '/areas/ac.png', topics: [] },
-  { id: 'heaters', label: 'Обогреватели', topics: [] },
+  { id: 'freezer_1', label: 'Морозильная камера 1', topics: threePhaseTopics('wb-map12e_73', 1) },
+  { id: 'freezer_2', label: 'Морозильная камера 2', photo: '/areas/freezer_2.png', topics: threePhaseTopics('wb-map12e_73', 2) },
+  { id: 'cold_veg', label: 'Холодильная камера (овощн.)', topics: threePhaseTopics('wb-map12e_73', 3) },
+  { id: 'cold_defrost_chicken', label: 'Холодильная камера (дефрост) для курицы', topics: threePhaseTopics('wb-map12e_73', 4) },
+  { id: 'coffee_1', label: 'Кофемашина 1', photo: '/areas/coffee_1.png', topics: singlePhaseTopics('wb-map12e_243', 2, 'L1') },
+  { id: 'coffee_2', label: 'Кофемашина 2', photo: '/areas/coffee_2.png', topics: singlePhaseTopics('wb-map12e_243', 2, 'L2') },
+  { id: 'salad_fridge', label: 'Холодильник саладет', topics: singlePhaseTopics('wb-map12e_243', 2, 'L3') },
+  { id: 'boiler_1', label: 'Бойлер 1', topics: threePhaseTopics('wb-map12e_98', 1) },
+  { id: 'boiler_2', label: 'Бойлер 2', topics: threePhaseTopics('wb-map12e_98', 2) },
+  { id: 'boiler_3', label: 'Бойлер 3', topics: threePhaseTopics('wb-map12e_98', 3) },
+  { id: 'cocktail', label: 'Коктельница', photo: '/areas/cocktail.png', topics: threePhaseTopics('wb-map12e_34', 4) },
+  { id: 'heat_curtain', label: 'Тепловая завесы', photo: '/areas/heat_curtain.png', topics: threePhaseTopics('wb-map12e_243', 1) },
+  { id: 'ac', label: 'Кондиционеры', photo: '/areas/ac.png', topics: threePhaseTopics('wb-map12e_98', 4) },
+  {
+    id: 'heaters',
+    label: 'Обогреватели',
+    topics: [
+      'Nevinnomisk/devices/wb-map12e_24/controls/Urms L1',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Urms L2',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Urms L3',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 Irms L1',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 Irms L2',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 Irms L3',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 P L1',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 P L2',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 P L3',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 Total P',
+      'Nevinnomisk/devices/wb-map12e_24/controls/Ch 4 Total AP energy'
+    ]
+  },
   { id: 'outdoor_light', label: 'Уличное освещение', topics: [] },
   { id: 'rest_light_group', label: 'Группа Освещение в ресторане', topics: [] },
-  { id: 'vent_panel_1', label: 'ЩИТ вентиляции 1', topics: [] },
+  {
+    id: 'vent_panel_1',
+    label: 'ЩИТ вентиляции 1-2',
+    topics: [
+      'Nevinnomisk/devices/wb-map3e_74/controls/Urms L1',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Urms L2',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Urms L3',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Irms L1',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Irms L2',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Irms L3',
+      'Nevinnomisk/devices/wb-map3e_74/controls/P L1',
+      'Nevinnomisk/devices/wb-map3e_74/controls/P L2',
+      'Nevinnomisk/devices/wb-map3e_74/controls/P L3',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Total P',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Total AP energy',
+      'Nevinnomisk/devices/wb-map3e_74/controls/Frequency'
+    ]
+  },
   {
     id: 'hall_1',
     label: 'ЗАЛ ДЛЯ ПОСЕТИТЕЛЕЙ (1)',
@@ -76,16 +140,59 @@ const AREA_OPTIONS = [
       'Nevinnomisk/devices/wb-msw-v4_41/controls/Sound Level'
     ]
   },
-  { id: 'hall_2', label: 'ЗАЛ ДЛЯ ПОСЕТИТЕЛЕЙ (2)', topics: [] },
+  {
+    id: 'hall_2',
+    label: 'ЗАЛ ДЛЯ ПОСЕТИТЕЛЕЙ (2)',
+    topics: [
+      'Nevinnomisk/devices/wb-msw-v4_96/controls/Temperature',
+      'Nevinnomisk/devices/wb-msw-v4_96/controls/Humidity',
+      'Nevinnomisk/devices/wb-msw-v4_96/controls/Illuminance',
+      'Nevinnomisk/devices/wb-msw-v4_96/controls/CO2',
+      'Nevinnomisk/devices/wb-msw-v4_96/controls/Air Quality (VOC)',
+      'Nevinnomisk/devices/wb-msw-v4_96/controls/Sound Level'
+    ]
+  },
   { id: 'payment_zone', label: 'ЗОНА ОПЛАТЫ ЗАКАЗА', topics: [] },
   { id: 'corridor', label: 'КОРИДОР', topics: [] },
-  { id: 'hot_shop_bread', label: 'ГОРЯЧИЙ ЦЕХ И ПАНИРОВОЧНАЯ', topics: [] },
+  {
+    id: 'hot_shop_bread',
+    label: 'ГОРЯЧИЙ ЦЕХ И ПАНИРОВОЧНАЯ',
+    topics: [
+      'Nevinnomisk/devices/wb-msw-v4_108/controls/Temperature',
+      'Nevinnomisk/devices/wb-msw-v4_108/controls/Humidity',
+      'Nevinnomisk/devices/wb-msw-v4_108/controls/Illuminance',
+      'Nevinnomisk/devices/wb-msw-v4_108/controls/CO2',
+      'Nevinnomisk/devices/wb-msw-v4_108/controls/Air Quality (VOC)',
+      'Nevinnomisk/devices/wb-msw-v4_108/controls/Sound Level'
+    ]
+  },
   { id: 'distribution', label: 'РАЗДАТОЧНАЯ', topics: [] },
   { id: 'cold_defrost_chicken_caps', label: 'ХОЛОДИЛЬНАЯ КАМЕРА (ДЕФРОСТ) ДЛЯ КУРИЦЫ', topics: [] },
-  { id: 'freezer_1_caps', label: 'МОРОЗИЛЬНАЯ КАМЕРА 1', topics: [] },
-  { id: 'freezer_2_caps', label: 'МОРОЗИЛЬНАЯ КАМЕРА 2', topics: [] },
+  {
+    id: 'freezer_1_caps',
+    label: 'МОРОЗИЛЬНАЯ КАМЕРА 1',
+    topics: [
+      'Nevinnomisk/devices/wb-m1w2_35/controls/External Sensor 1',
+      'Nevinnomisk/devices/wb-m1w2_35/controls/External Sensor 2'
+    ]
+  },
+  {
+    id: 'freezer_2_caps',
+    label: 'МОРОЗИЛЬНАЯ КАМЕРА 2',
+    topics: [
+      'Nevinnomisk/devices/wb-m1w2_63/controls/External Sensor 1',
+      'Nevinnomisk/devices/wb-m1w2_63/controls/External Sensor 2'
+    ]
+  },
   { id: 'cold_veg_caps', label: 'ХОЛОДИЛЬНАЯ КАМЕРА (ОВОЩН.)', topics: [] },
-  { id: 'technical_boilers', label: 'ТЕХНИЧЕСКОЕ ПОМЕЩЕНИЕ (БОЙЛЕРЫ)', topics: [] },
+  {
+    id: 'technical_boilers',
+    label: 'ТЕХНИЧЕСКОЕ ПОМЕЩЕНИЕ (БОЙЛЕРЫ)',
+    topics: [
+      'Nevinnomisk/devices/wb-m1w2_69/controls/External Sensor 1',
+      'Nevinnomisk/devices/wb-m1w2_69/controls/External Sensor 2'
+    ]
+  },
   {
     id: 'weather',
     label: 'Погода',
@@ -97,11 +204,33 @@ const AREA_OPTIONS = [
   }
 ]
 
-const PHASE_COLORS = ['#44f6ff', '#fbbf24', '#4ade80']
+const PHASE_COLORS = ['#ff7a59', '#ffd166', '#06d6a0']
+
+const EQUIPMENT_COLORS = [
+  '#ff7a59',
+  '#ffd166',
+  '#06d6a0',
+  '#ff006e',
+  '#8338ec',
+  '#3a86ff',
+  '#fb5607',
+  '#ffbe0b',
+  '#05ffa1',
+  '#c1121f',
+  '#ee9b00',
+  '#ae2012',
+]
+
+function getColorForEquipmentId(equipmentId) {
+  const hash = equipmentId.split('').reduce((acc, char) => {
+    return acc + char.charCodeAt(0)
+  }, 0)
+  return EQUIPMENT_COLORS[hash % EQUIPMENT_COLORS.length]
+}
 
 const AREA_GROUPING = {
   total_kfc: {
-    accentColor: '#44f6ff',
+    accentColor: '#ff7a59',
     phaseColors: PHASE_COLORS,
     pinned: [
       'Nevinnomisk/devices/energomera303_00000201/controls/Total P',
@@ -152,6 +281,78 @@ const AREA_GROUPING = {
   }
 }
 
+function pickTopicBySuffix(topics, ...suffixes) {
+  return topics.find(topic => suffixes.some(suffix => topic.endsWith(suffix))) || null
+}
+
+function buildPhaseLines(topics, metricTail, labelPrefix = 'Линия') {
+  const phases = ['L1', 'L2', 'L3']
+  return phases
+    .map(phase => {
+      const topic = pickTopicBySuffix(topics, `${metricTail} ${phase}`)
+      if (!topic) return null
+      return { topic, label: `${labelPrefix} ${phase}` }
+    })
+    .filter(Boolean)
+}
+
+function buildGenericElectricGrouping(area) {
+  if (!area?.topics?.length) return null
+
+  const topics = area.topics
+
+  const voltageLines = buildPhaseLines(topics, 'Urms')
+  const currentLines = buildPhaseLines(topics, 'Irms')
+  const powerLines = buildPhaseLines(topics, 'P')
+
+  const groups = []
+  if (voltageLines.length) {
+    groups.push({
+      id: `${area.id}_voltage_phases`,
+      label: 'Напряжение по фазам',
+      unit: 'В',
+      lines: voltageLines,
+    })
+  }
+  if (currentLines.length) {
+    groups.push({
+      id: `${area.id}_current_phases`,
+      label: 'Ток по фазам',
+      unit: 'А',
+      lines: currentLines,
+    })
+  }
+  if (powerLines.length) {
+    groups.push({
+      id: `${area.id}_power_phases`,
+      label: 'Мощность по фазам',
+      unit: 'кВт',
+      lines: powerLines,
+    })
+  }
+
+  if (!groups.length) return null
+
+  const totalPower =
+    pickTopicBySuffix(topics, 'Total P') ||
+    powerLines[0]?.topic ||
+    null
+  const totalEnergy =
+    pickTopicBySuffix(topics, 'Total AP energy', 'Total A energy', 'AP energy L1', 'AP energy L2', 'AP energy L3') ||
+    null
+  const frequencyTopic = pickTopicBySuffix(topics, 'Frequency')
+
+  const accentColor = getColorForEquipmentId(area.id)
+
+  return {
+    accentColor,
+    phaseColors: PHASE_COLORS,
+    pinned: [totalPower, totalEnergy].filter(Boolean),
+    groups,
+    trailing: [frequencyTopic].filter(Boolean),
+  }
+}
+
 function formatMetricValue(value) {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return '0'
@@ -163,17 +364,60 @@ function formatMetricValue(value) {
   })
 }
 
+function parseBackendTimestamp(timestamp) {
+  if (!timestamp) {
+    return null
+  }
+
+  const raw = String(timestamp)
+  const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(raw)
+  const iso = hasTimezone ? raw : `${raw}Z`
+  const parsed = new Date(iso)
+
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed
+  }
+
+  const fallback = new Date(raw)
+  return Number.isNaN(fallback.getTime()) ? null : fallback
+}
+
 function formatTimestamp(timestamp) {
   if (!timestamp) {
     return '—'
   }
 
-  return new Date(timestamp).toLocaleString('ru-RU', {
+  const d = parseBackendTimestamp(timestamp)
+  if (!d) {
+    return '—'
+  }
+
+  return d.toLocaleString('ru-RU', {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function formatDateRangeCompact(from, to) {
+  const fromDate = parseBackendTimestamp(from)
+  const toDate = parseBackendTimestamp(to)
+  if (!fromDate || !toDate) return 'Период: —'
+
+  const fromText = fromDate.toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  const toText = toDate.toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return `Период: ${fromText} - ${toText}`
 }
 
 function formatXLabel(timestamp, windowSize) {
@@ -199,7 +443,7 @@ function computeXTicks(minTime, maxTime, windowSize, count = 5) {
   return ticks
 }
 
-function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) {
+function HistoryChart({ points, chartId, windowSize, accentColor = '#ff7a59' }) {
   const [hoveredIndex, setHoveredIndex] = useState(null)
 
   if (!points.length) {
@@ -214,13 +458,15 @@ function HistoryChart({ points, chartId, windowSize, accentColor = '#44f6ff' }) 
   const max = Math.max(...numbers)
   const range = max - min || 1
 
-  const times = points.map(p => new Date(p.timestamp).getTime()).filter(t => !Number.isNaN(t))
+  const times = points
+    .map(p => parseBackendTimestamp(p.timestamp)?.getTime() ?? Number.NaN)
+    .filter(t => !Number.isNaN(t))
   const minTime = Math.min(...times)
   const maxTime = Math.max(...times)
   const timeRange = maxTime - minTime || 1
 
   const chartPoints = points.map(point => {
-    const t = new Date(point.timestamp).getTime()
+    const t = parseBackendTimestamp(point.timestamp)?.getTime() ?? minTime
     const x = padding + ((t - minTime) / timeRange) * (width - padding * 2)
     const y = height - padding - ((point.value - min) / range) * (height - padding * 2)
     return [x, y]
@@ -330,7 +576,7 @@ function MultiLineChart({ lines, windowSize }) {
 
   const allValues = allPoints.map(p => p.value)
   const allTimes = allPoints
-    .map(p => new Date(p.timestamp).getTime())
+    .map(p => parseBackendTimestamp(p.timestamp)?.getTime() ?? Number.NaN)
     .filter(t => !Number.isNaN(t))
 
   const minVal = Math.min(...allValues)
@@ -341,7 +587,7 @@ function MultiLineChart({ lines, windowSize }) {
   const timeRange = maxTime - minTime || 1
 
   function mapXY(point) {
-    const t = new Date(point.timestamp).getTime()
+    const t = parseBackendTimestamp(point.timestamp)?.getTime() ?? minTime
     const x = padding + ((t - minTime) / timeRange) * (width - padding * 2)
     const y = height - padding - ((point.value - minVal) / valRange) * (height - padding * 2)
     return [x, y]
@@ -462,13 +708,25 @@ function toChartId(topic) {
   return `history-fill-${topic.replace(/[^a-zA-Z0-9_-]/g, '_')}`
 }
 
-function SingleTopicCard({ item, loading, windowSize, accentColor = '#44f6ff' }) {
+function formatEnergyValue(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return '—'
+  }
+  return value.toLocaleString('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+  })
+}
+
+function SingleTopicCard({ item, loading, windowSize, accentColor = '#ff7a59' }) {
   const values = item.points.map(p => p.value)
   const latest = values.length ? values[values.length - 1] : 0
-  const minimum = values.length ? Math.min(...values) : 0
-  const maximum = values.length ? Math.max(...values) : 0
-  const average = values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : 0
   const recentPoints = [...item.points].slice(-6).reverse()
+  const isEnergyMetric = /energy/i.test(item.topic) || /энерг/i.test(item.label)
+
+  const energyRows = [
+    { key: 'today', label: 'Сегодня',   period: item.energySummary?.today },
+  ]
 
   return (
     <section className="history-topic-card history-electric-card">
@@ -487,25 +745,33 @@ function SingleTopicCard({ item, loading, windowSize, accentColor = '#44f6ff' })
           <h3>{item.label}</h3>
           <span className="history-topic-path">{item.topic}</span>
         </div>
-        <span>{loading ? 'Загрузка...' : `${item.points.length} точек`}</span>
+        {loading && <span>Загрузка...</span>}
       </div>
       <div className="history-stats mini">
-        <article className="history-stat-card">
-          <span>Последнее</span>
-          <strong>{formatMetricValue(latest)} {item.unit}</strong>
-        </article>
-        <article className="history-stat-card">
-          <span>Минимум</span>
-          <strong>{formatMetricValue(minimum)} {item.unit}</strong>
-        </article>
-        <article className="history-stat-card">
-          <span>Максимум</span>
-          <strong>{formatMetricValue(maximum)} {item.unit}</strong>
-        </article>
-        <article className="history-stat-card">
-          <span>Среднее</span>
-          <strong>{formatMetricValue(average)} {item.unit}</strong>
-        </article>
+        {!isEnergyMetric && (
+          <article className="history-stat-card">
+            <span>Последнее значение</span>
+            <strong>{formatMetricValue(latest)} {item.unit}</strong>
+          </article>
+        )}
+        {isEnergyMetric && energyRows.map(row => {
+          const period = row.period
+          const hasValue = typeof period?.value === 'number'
+          return (
+            <article key={row.key} className="history-stat-card">
+              <span>{row.label}</span>
+              {hasValue
+                ? <strong>{formatEnergyValue(period.value)} {item.unit || 'кВт·ч'}</strong>
+                : <strong className="history-energy-nodata">Нет данных</strong>
+              }
+              {hasValue && (
+                <small className="history-energy-range">
+                  {formatDateRangeCompact(period.from, period.to)}
+                </small>
+              )}
+            </article>
+          )
+        })}
       </div>
       <div className="history-topic-grid">
         <section className="history-chart-card">
@@ -559,8 +825,6 @@ function GroupedTopicCard({ group, seriesByTopic, loading, windowSize, phaseColo
         {linesData.map((line, i) => {
           const vals = line.points.map(p => p.value)
           const last = vals.length ? vals[vals.length - 1] : null
-          const minV = vals.length ? Math.min(...vals) : null
-          const maxV = vals.length ? Math.max(...vals) : null
           return (
             <article
               key={i}
@@ -573,12 +837,6 @@ function GroupedTopicCard({ group, seriesByTopic, loading, windowSize, phaseColo
                   ? `${formatMetricValue(last)}${group.unit ? ' ' + group.unit : ''}`
                   : '—'}
               </strong>
-              {minV !== null && (
-                <small>
-                  {formatMetricValue(minV)} – {formatMetricValue(maxV)}
-                  {group.unit ? ` ${group.unit}` : ''}
-                </small>
-              )}
             </article>
           )
         })}
@@ -600,11 +858,35 @@ function GroupedTopicCard({ group, seriesByTopic, loading, windowSize, phaseColo
 
 function downloadCSV(series, selectedArea, windowSize) {
   if (!series.length) return
+
+  const formatTimestamp = (value) => {
+    const d = parseBackendTimestamp(value)
+    if (!d) return String(value ?? '')
+
+    const ms = d.getMilliseconds()
+    if (ms >= 500) {
+      d.setSeconds(d.getSeconds() + 1)
+    }
+
+    const date = [
+      d.getFullYear(),
+      String(d.getMonth() + 1).padStart(2, '0'),
+      String(d.getDate()).padStart(2, '0')
+    ].join('-')
+    const time = [
+      String(d.getHours()).padStart(2, '0'),
+      String(d.getMinutes()).padStart(2, '0'),
+      String(d.getSeconds()).padStart(2, '0')
+    ].join(':')
+
+    return `${date} ${time}`
+  }
+
   const rows = [['Timestamp', 'Metric', 'Topic', 'Value', 'Unit']]
   for (const item of series) {
     for (const point of [...item.points].reverse()) {
       rows.push([
-        point.timestamp,
+        formatTimestamp(point.timestamp),
         item.label,
         item.topic,
         point.value,
@@ -618,8 +900,13 @@ function downloadCSV(series, selectedArea, windowSize) {
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
+  const metricNameForFile = String(selectedArea?.label ?? 'metric')
+    .trim()
+    .replace(/[^\p{L}\p{N}]+/gu, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_+/g, '_')
   a.href = url
-  a.download = `${selectedArea.id}_${windowSize}_${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `${metricNameForFile || 'metric'}_${windowSize}_${new Date().toISOString().slice(0, 10)}.csv`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
@@ -678,7 +965,8 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
               topic,
               label: metric?.label || topicTail(topic),
               unit: metric?.unit || '',
-              points
+              points,
+              energySummary: data.energySummary || null,
             }
           })
       )
@@ -717,8 +1005,16 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
     )
   }
 
-  const grouping = AREA_GROUPING[selectedAreaId]
+  const grouping = AREA_GROUPING[selectedAreaId] || buildGenericElectricGrouping(selectedArea)
   const seriesByTopic = Object.fromEntries(series.map(s => [s.topic, s]))
+  const groupedTopics = grouping
+    ? new Set([
+        ...grouping.pinned,
+        ...(grouping.trailing || []),
+        ...grouping.groups.flatMap(group => group.lines.map(line => line.topic)),
+      ])
+    : new Set()
+  const remainingSeries = series.filter(item => !groupedTopics.has(item.topic))
 
   return (
     <div className="historical-view">
@@ -809,7 +1105,7 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
                   {grouping.pinned.map(topic => {
                     const item = seriesByTopic[topic]
                     return item
-                      ? <SingleTopicCard key={topic} item={item} loading={loading} windowSize={windowSize} accentColor={grouping.accentColor || '#44f6ff'} />
+                      ? <SingleTopicCard key={topic} item={item} loading={loading} windowSize={windowSize} accentColor={grouping.accentColor || '#ff7a59'} />
                       : null
                   })}
                   {grouping.groups.map(group => (
@@ -821,6 +1117,15 @@ export function HistoricalView({ apiBaseUrl, metrics }) {
                       windowSize={windowSize}
                       phaseColors={grouping.phaseColors || PHASE_COLORS}
                     />
+                  ))}
+                  {(grouping.trailing || []).map(topic => {
+                    const item = seriesByTopic[topic]
+                    return item
+                      ? <SingleTopicCard key={topic} item={item} loading={loading} windowSize={windowSize} accentColor={grouping.accentColor || '#ff7a59'} />
+                      : null
+                  })}
+                  {remainingSeries.map(item => (
+                    <SingleTopicCard key={item.topic} item={item} loading={loading} windowSize={windowSize} accentColor={grouping.accentColor || '#ff7a59'} />
                   ))}
                 </>
               : series.map(item => (

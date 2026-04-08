@@ -31,7 +31,7 @@
 .history-stat-card,
 .history-header {
   background: linear-gradient(180deg, rgba(12, 20, 35, 0.92), rgba(10, 16, 28, 0.82));
-  border: 1px solid rgba(68, 246, 255, 0.18);
+  border: 1px solid rgba(255, 122, 89, 0.24);
   border-radius: 1.4rem;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(12px);
@@ -48,7 +48,7 @@
   margin: 0 0 0.35rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba(68, 246, 255, 0.76);
+  color: rgba(255, 122, 89, 0.82);
   font-size: 0.72rem;
 }
 
@@ -65,7 +65,7 @@
 }
 
 .history-subtitle span {
-  color: #44f6ff;
+  color: #ff7a59;
 }
 
 .history-area-photo {
@@ -109,7 +109,7 @@
   width: 100%;
   padding: 0.8rem 1rem;
   border-radius: 0.9rem;
-  border: 1px solid rgba(68, 246, 255, 0.28);
+  border: 1px solid rgba(255, 122, 89, 0.32);
   background: rgba(5, 12, 24, 0.84);
   color: #eef4ff;
 }
@@ -118,9 +118,9 @@
   flex-shrink: 0;
   padding: 0.78rem 1.1rem;
   border-radius: 0.9rem;
-  border: 1px solid rgba(68, 246, 255, 0.38);
-  background: rgba(68, 246, 255, 0.09);
-  color: #44f6ff;
+  border: 1px solid rgba(255, 122, 89, 0.4);
+  background: rgba(255, 122, 89, 0.12);
+  color: #ff9f89;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -130,9 +130,9 @@
 }
 
 .history-download-btn:hover:not(:disabled) {
-  background: #44f6ff;
+  background: #ff7a59;
   color: #06101c;
-  border-color: #44f6ff;
+  border-color: #ff7a59;
 }
 
 .history-download-btn:disabled {
@@ -147,7 +147,7 @@
 }
 
 .history-range {
-  border: 1px solid rgba(68, 246, 255, 0.22);
+  border: 1px solid rgba(255, 122, 89, 0.28);
   background: rgba(11, 18, 31, 0.82);
   color: rgba(238, 244, 255, 0.74);
   border-radius: 999px;
@@ -159,8 +159,8 @@
 .history-range.active,
 .history-range:hover {
   color: #06101c;
-  background: #44f6ff;
-  border-color: #44f6ff;
+  background: #ffd166;
+  border-color: #ffd166;
 }
 
 .history-stats {
@@ -185,6 +185,26 @@
 .history-stat-card strong {
   font-size: 1.35rem;
   color: #f4fbff;
+}
+
+.history-energy-range {
+  color: rgba(238, 244, 255, 0.58);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.history-stat-card--nodata strong,
+.history-energy-nodata {
+  color: rgba(238, 244, 255, 0.35) !important;
+  font-size: 1.1rem !important;
+}
+
+.history-stat-card--partial strong {
+  color: #ffd166;
+}
+
+.history-stat-card--partial .history-energy-range {
+  color: rgba(255, 209, 102, 0.7);
 }
 
 .history-content-grid {
@@ -335,7 +355,7 @@
 }
 
 .history-card-header span {
-  color: rgba(68, 246, 255, 0.74);
+  color: rgba(255, 209, 102, 0.9);
   font-size: 0.88rem;
 }
 
@@ -359,7 +379,7 @@
   display: block;
   width: 100%;
   height: 280px;
-  background: linear-gradient(180deg, rgba(68, 246, 255, 0.04), rgba(68, 246, 255, 0.01));
+  background: linear-gradient(180deg, rgba(255, 122, 89, 0.06), rgba(255, 209, 102, 0.02));
   border-radius: 1rem;
 }
 

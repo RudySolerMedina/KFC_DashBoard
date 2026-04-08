@@ -1,7 +1,8 @@
 .metric-card {
+  --metric-accent: color-mix(in srgb, var(--electric-border-color, #ff7a59) 75%, #ffffff 25%);
   padding: 1.2rem;
   background: rgba(10, 20, 40, 0.6);
-  border: 1px solid rgba(68, 246, 255, 0.3);
+  border: 1px solid color-mix(in srgb, var(--metric-accent) 35%, transparent 65%);
   border-radius: 0.8rem;
   position: relative;
   transition: all 0.3s ease;
@@ -23,8 +24,8 @@
 }
 
 .metric-card:hover {
-  border-color: rgba(68, 246, 255, 0.7);
-  box-shadow: 0 8px 24px rgba(68, 246, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: color-mix(in srgb, var(--metric-accent) 70%, transparent 30%);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--metric-accent) 28%, transparent 72%), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transform: translateY(-3px);
 }
 
@@ -41,8 +42,8 @@
   margin: 0.5rem 0 0.3rem;
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--neon-cyan);
-  text-shadow: 0 0 15px rgba(68, 246, 255, 0.5);
+  color: var(--metric-accent);
+  text-shadow: 0 0 15px color-mix(in srgb, var(--metric-accent) 55%, transparent 45%);
 }
 
 .metric-unit {
@@ -58,7 +59,7 @@
   align-items: center;
   margin-top: 0.75rem;
   padding-top: 3px;
-  border-top: 1px solid rgba(68, 246, 255, 0.12);
+  border-top: 1px solid color-mix(in srgb, var(--metric-accent) 24%, transparent 76%);
 }
 
 .sparkline-scale {
@@ -94,11 +95,11 @@
 }
 
 .sparkline-line {
-  filter: drop-shadow(0 0 3px rgba(68, 246, 255, 0.9));
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--metric-accent) 90%, transparent 10%));
 }
 
 .sparkline-dot {
-  filter: drop-shadow(0 0 5px #44f6ff);
+  filter: drop-shadow(0 0 5px var(--metric-accent));
   animation: dot-blink 1.2s ease-in-out infinite;
 }
 
@@ -115,15 +116,15 @@
   min-width: 40px;
   height: 52px;
   font-size: 0.75rem;
-  color: rgba(68, 246, 255, 0.8);
+  color: color-mix(in srgb, var(--metric-accent) 82%, white 18%);
   font-weight: 500;
 }
 
 .sparkline-current {
-  background: rgba(68, 246, 255, 0.08);
+  background: color-mix(in srgb, var(--metric-accent) 10%, transparent 90%);
   padding: 2px 6px;
   border-radius: 3px;
-  border: 1px solid rgba(68, 246, 255, 0.3);
+  border: 1px solid color-mix(in srgb, var(--metric-accent) 35%, transparent 65%);
 }
 
 .sparkline-empty {
@@ -132,16 +133,6 @@
   font-size: 0.7rem;
   color: rgba(159, 178, 209, 0.25);
   letter-spacing: 0.4em;
-  border-top: 1px solid rgba(68, 246, 255, 0.08);
+  border-top: 1px solid color-mix(in srgb, var(--metric-accent) 15%, transparent 85%);
   padding-top: 6px;
-}
-
-/* White values for all electrical metric groups */
-.group-total .metric-value,
-.group-voltages .metric-value,
-.group-currents .metric-value,
-.group-power .metric-value,
-.group-power-factor .metric-value {
-  color: #ffffff;
-  text-shadow: 0 0 14px rgba(255, 255, 255, 0.35);
 }

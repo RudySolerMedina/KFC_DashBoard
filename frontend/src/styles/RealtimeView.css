@@ -33,16 +33,44 @@
 }
 
 .metric-group.electric-card {
-  --electric-border-color: #46b7ff;
-  --electric-light-color: #9edcff;
-  --electric-gradient-color: rgba(70, 183, 255, 0.34);
-  --electric-title-color: #d5edff;
+  --electric-border-color: #ff7a59;
+  --electric-light-color: #ffb8a6;
+  --electric-gradient-color: rgba(255, 122, 89, 0.34);
+  --electric-title-color: #ffd5cb;
   overflow: visible;
   background:
     linear-gradient(-30deg, var(--electric-gradient-color), transparent, var(--electric-gradient-color)),
     linear-gradient(to bottom, rgba(18, 24, 40, 0.94), rgba(18, 24, 40, 0.94));
   border: none;
   isolation: isolate;
+}
+
+.groups-grid .metric-group.electric-card:nth-child(4n + 1) {
+  --electric-border-color: #ff7a59;
+  --electric-light-color: #ffb8a6;
+  --electric-gradient-color: rgba(255, 122, 89, 0.34);
+  --electric-title-color: #ffd5cb;
+}
+
+.groups-grid .metric-group.electric-card:nth-child(4n + 2) {
+  --electric-border-color: #ffd166;
+  --electric-light-color: #ffe4a3;
+  --electric-gradient-color: rgba(255, 209, 102, 0.3);
+  --electric-title-color: #fff0c8;
+}
+
+.groups-grid .metric-group.electric-card:nth-child(4n + 3) {
+  --electric-border-color: #06d6a0;
+  --electric-light-color: #8df2d6;
+  --electric-gradient-color: rgba(6, 214, 160, 0.3);
+  --electric-title-color: #c8fff0;
+}
+
+.groups-grid .metric-group.electric-card:nth-child(4n + 4) {
+  --electric-border-color: #ef476f;
+  --electric-light-color: #ff9db3;
+  --electric-gradient-color: rgba(239, 71, 111, 0.3);
+  --electric-title-color: #ffd1dc;
 }
 
 .metric-group.electric-card.group-total {

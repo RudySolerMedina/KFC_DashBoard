@@ -46,8 +46,8 @@ function SparkLine({ history, topicId }) {
       <svg className="sparkline" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#44f6ff" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#44f6ff" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--metric-accent, #ff7a59)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--metric-accent, #ff7a59)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path className="sparkline-area" d={areaPath} fill={`url(#${gradId})`} />
@@ -55,7 +55,7 @@ function SparkLine({ history, topicId }) {
           className="sparkline-line"
           points={polyline}
           fill="none"
-          stroke="#44f6ff"
+          stroke="var(--metric-accent, #ff7a59)"
           strokeWidth="1.8"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -64,7 +64,7 @@ function SparkLine({ history, topicId }) {
           cx={last[0].toFixed(1)}
           cy={last[1].toFixed(1)}
           r="3"
-          fill="#44f6ff"
+          fill="var(--metric-accent, #ff7a59)"
           className="sparkline-dot"
         />
       </svg>
@@ -76,9 +76,7 @@ function SparkLine({ history, topicId }) {
 }
 
 export function MetricCard({ metric, value, history }) {
-  const numValue = typeof value === 'number'
-    ? value
-    : typeof value === 'object' ? (value?.value ?? 0) : parseFloat(value) || 0
+  const numValue = typeof value === 'object' ? (value?.value ?? 0) : (typeof value === 'number' ? value : 0)
 
   const displayValue = numValue.toLocaleString('ru-RU', {
     minimumFractionDigits: 0,

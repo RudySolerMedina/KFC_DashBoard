@@ -30,76 +30,86 @@ function App() {
     fetch(`${API_BASE_URL}/api/metrics`)
       .then(r => r.json())
       .then(data => {
-        setMetrics(data.metrics)
-        setValues(data.values)
+        setMetrics(data.metrics || [])
+        setValues(data.values || {})
+        setBroker(data.broker || '')
       })
-      .catch(e => console.error('API error:', e))
+      .catch(e => console.error('[API] error:', e))
 
-    const connectWebSocket = () => {
-      if (!shouldReconnectRef.current) {
-        return
-      }
+    const connectWS = () => {
+      if (!shouldReconnectRef.current) return
 
       const ws = new WebSocket(`${WS_BASE_URL}/ws`)
       wsRef.current = ws
 
       ws.onopen = () => {
+        console.log('[WS] connected')
         setConnected(true)
+        if (reconnectTimerRef.current) {
+          clearTimeout(reconnectTimerRef.current)
+          reconnectTimerRef.current = null
+        }
       }
 
       ws.onmessage = (event) => {
         try {
-          const payload = JSON.parse(event.data)
+          const msg = JSON.parse(event.data)
+          console.log('[WS] message received:', msg.type, msg.topic || '')
 
-          if (payload.type === 'bootstrap') {
-            setBroker(payload.broker)
-            setMetrics(payload.metrics)
-            setValues(payload.values)
-            // Seed histories with the initial bootstrap values
-            const init = {}
-            Object.entries(payload.values).forEach(([topic, v]) => {
-              const num = typeof v === 'object' ? v.value : v
-              if (typeof num === 'number' && !isNaN(num)) init[topic] = [num]
+          if (msg.type === 'bootstrap') {
+            console.log('[WS] bootstrap received, metrics:', msg.metrics?.length)
+            setMetrics(msg.metrics || [])
+            setBroker(msg.broker || '')
+
+            const newValues = {}
+            const newHistories = {}
+            Object.entries(msg.values || {}).forEach(([topic, val]) => {
+              const num = typeof val === 'number' ? val : (val?.value ?? 0)
+              newValues[topic] = { value: num, ts: val?.ts ?? Date.now() / 1000 }
+              newHistories[topic] = [num]
             })
-            setHistories(init)
+            setValues(newValues)
+            setHistories(newHistories)
+            console.log('[WS] bootstrap processed, loaded', Object.keys(newValues).length, 'topics')
           }
 
-          if (payload.type === 'metric') {
-            const num = parseFloat(payload.value)
-            setValues(prev => ({ ...prev, [payload.topic]: { value: num, ts: payload.ts } }))
-            setHistories(prev => {
-              const arr = prev[payload.topic] || []
-              return { ...prev, [payload.topic]: [...arr, num].slice(-MAX_HISTORY) }
-            })
+          if (msg.type === 'metric') {
+            const val = typeof msg.value === 'number' ? msg.value : 0
+            console.log('[WS] metric update:', msg.topic, '=', val)
+            setValues(prev => ({
+              ...prev,
+              [msg.topic]: { value: val, ts: msg.ts ?? Date.now() / 1000 }
+            }))
+            setHistories(prev => ({
+              ...prev,
+              [msg.topic]: [...(prev[msg.topic] || []), val].slice(-MAX_HISTORY)
+            }))
           }
-        } catch (error) {
-          console.error('WebSocket parse error:', error)
+        } catch (err) {
+          console.error('[WS] parse error:', err)
         }
       }
 
       ws.onerror = () => {
+        console.error('[WS] error')
         setConnected(false)
       }
 
       ws.onclose = () => {
+        console.log('[WS] closed')
         setConnected(false)
         if (shouldReconnectRef.current) {
-          reconnectTimerRef.current = setTimeout(connectWebSocket, 2000)
+          reconnectTimerRef.current = setTimeout(connectWS, 2000)
         }
       }
     }
 
-    connectWebSocket()
+    connectWS()
 
     return () => {
       shouldReconnectRef.current = false
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current)
-        reconnectTimerRef.current = null
-      }
-      if (wsRef.current) {
-        wsRef.current.close()
-      }
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current)
+      if (wsRef.current) wsRef.current.close()
     }
   }, [])
 
@@ -112,22 +122,18 @@ function App() {
             <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1">
               <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
             </feOffset>
-
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
             <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2">
               <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear" />
             </feOffset>
-
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
             <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3">
               <animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
             </feOffset>
-
             <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
             <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4">
               <animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear" />
             </feOffset>
-
             <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
             <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
             <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
